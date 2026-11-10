@@ -221,7 +221,6 @@ class _UnifiedPostCardState extends State<UnifiedPostCard>
   Widget build(BuildContext context) {
     final item = widget.item;
     final theme = Theme.of(context);
-    final colors = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
     final media = item.mediaUrls;
 
@@ -239,22 +238,22 @@ class _UnifiedPostCardState extends State<UnifiedPostCard>
     final timeAgo = _formatTimeAgo(item.publishedAt);
 
     return Container(
-      margin: const EdgeInsets.fromLTRB(14, 6, 14, 14),
+      margin: const EdgeInsets.fromLTRB(14, 4, 14, 12),
       decoration: BoxDecoration(
         color: isDark
-            ? const Color(0xFF13151D).withValues(alpha: 0.85)
-            : Colors.white.withValues(alpha: 0.92),
+            ? const Color(0xFF12151E).withValues(alpha: 0.92)
+            : Colors.white.withValues(alpha: 0.95),
         borderRadius: BorderRadius.circular(22),
         border: Border.all(
           color: isDark
-              ? Colors.white.withValues(alpha: 0.08)
+              ? Colors.white.withValues(alpha: 0.07)
               : Colors.black.withValues(alpha: 0.05),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.28 : 0.04),
-            blurRadius: 18,
+            color: Colors.black.withValues(alpha: isDark ? 0.22 : 0.03),
+            blurRadius: 16,
             offset: const Offset(0, 4),
           ),
         ],
@@ -273,7 +272,7 @@ class _UnifiedPostCardState extends State<UnifiedPostCard>
                   clipBehavior: Clip.none,
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(2.2),
+                      padding: const EdgeInsets.all(2),
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         gradient: LinearGradient(
@@ -283,25 +282,23 @@ class _UnifiedPostCardState extends State<UnifiedPostCard>
                         ),
                       ),
                       child: CircleAvatar(
-                        radius: 19,
+                        radius: 18.5,
                         backgroundColor: isDark
                             ? const Color(0xFF1E212D)
                             : const Color(0xFFE8ECF4),
                         foregroundImage: item.authorAvatarUrl.isNotEmpty
                             ? NetworkImage(item.authorAvatarUrl)
                             : null,
-                        child: item.authorAvatarUrl.isEmpty
-                            ? Text(
-                                item.accountUsername.isNotEmpty
-                                    ? item.accountUsername[0].toUpperCase()
-                                    : '?',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                  color: item.platform.primaryColor,
-                                  fontSize: 14,
-                                ),
-                              )
-                            : null,
+                        child: Text(
+                          item.accountUsername.isNotEmpty
+                              ? item.accountUsername[0].toUpperCase()
+                              : '?',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            color: item.platform.primaryColor,
+                            fontSize: 13.5,
+                          ),
+                        ),
                       ),
                     ),
                     // Micro badge da plataforma no canto inferior
@@ -309,10 +306,11 @@ class _UnifiedPostCardState extends State<UnifiedPostCard>
                       bottom: -1,
                       right: -1,
                       child: Container(
-                        padding: const EdgeInsets.all(2.5),
+                        padding: const EdgeInsets.all(2),
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: isDark ? const Color(0xFF13151D) : Colors.white,
+                          color:
+                              isDark ? const Color(0xFF12151E) : Colors.white,
                         ),
                         child: Container(
                           padding: const EdgeInsets.all(2),
@@ -322,7 +320,7 @@ class _UnifiedPostCardState extends State<UnifiedPostCard>
                           ),
                           child: Icon(
                             item.platform.iconData,
-                            size: 8.5,
+                            size: 8,
                             color: Colors.white,
                           ),
                         ),
@@ -342,7 +340,7 @@ class _UnifiedPostCardState extends State<UnifiedPostCard>
                               item.authorName,
                               style: const TextStyle(
                                 fontWeight: FontWeight.w700,
-                                fontSize: 14.5,
+                                fontSize: 14,
                                 letterSpacing: -0.2,
                               ),
                               maxLines: 1,
@@ -365,7 +363,7 @@ class _UnifiedPostCardState extends State<UnifiedPostCard>
                         ].join(' · '),
                         style: TextStyle(
                           fontSize: 12,
-                          color: isDark ? Colors.white60 : Colors.black54,
+                          color: isDark ? Colors.white54 : Colors.black54,
                           fontWeight: FontWeight.w500,
                         ),
                         maxLines: 1,
@@ -380,19 +378,15 @@ class _UnifiedPostCardState extends State<UnifiedPostCard>
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
                   decoration: BoxDecoration(
-                    color: item.platform.primaryColor.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: item.platform.primaryColor.withValues(alpha: 0.28),
-                      width: 0.8,
-                    ),
+                    color: item.platform.primaryColor.withValues(alpha: 0.10),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
                         item.platform.iconData,
-                        size: 11,
+                        size: 10.5,
                         color: item.platform.primaryColor,
                       ),
                       const SizedBox(width: 4),
@@ -414,7 +408,8 @@ class _UnifiedPostCardState extends State<UnifiedPostCard>
                   icon: const Icon(CupertinoIcons.ellipsis, size: 18),
                   visualDensity: VisualDensity.compact,
                   padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                  constraints:
+                      const BoxConstraints(minWidth: 32, minHeight: 32),
                   onPressed: () => _showPostOptions(context),
                 ),
               ],
@@ -817,115 +812,108 @@ class _UnifiedPostCardState extends State<UnifiedPostCard>
                   ),
                 ),
 
-                // Tag da Mídia no canto superior esquerdo
+                // Tag da Mídia no canto superior esquerdo (sem BackdropFilter para máxima fluidez)
                 Positioned(
                   top: 12,
                   left: 12,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(20),
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 5),
-                        color: Colors.black.withValues(alpha: 0.55),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              item.platform == SocialPlatform.tiktok
-                                  ? CupertinoIcons.play_circle_fill
-                                  : CupertinoIcons.videocam_fill,
-                              size: 13,
-                              color: item.platform.primaryColor,
-                            ),
-                            const SizedBox(width: 5),
-                            Text(
-                              item.platform == SocialPlatform.tiktok
-                                  ? 'TikTok'
-                                  : item.type == FeedItemType.reel
-                                      ? 'Reel'
-                                      : 'Vídeo',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 11.5,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 0.2,
-                              ),
-                            ),
-                          ],
-                        ),
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.68),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.14),
+                        width: 0.8,
                       ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          item.platform == SocialPlatform.tiktok
+                              ? CupertinoIcons.play_circle_fill
+                              : CupertinoIcons.videocam_fill,
+                          size: 13,
+                          color: item.platform.primaryColor,
+                        ),
+                        const SizedBox(width: 5),
+                        Text(
+                          item.platform == SocialPlatform.tiktok
+                              ? 'TikTok'
+                              : item.type == FeedItemType.reel
+                                  ? 'Reel'
+                                  : 'Vídeo',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.2,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
 
-                // Botão Central de Play no Feed (Estilo Social Media)
+                // Botão Central de Play no Feed
                 Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      ClipOval(
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                          child: Container(
-                            width: 66,
-                            height: 66,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.black.withValues(alpha: 0.45),
-                              border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.4),
-                                width: 2,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: item.platform.primaryColor
-                                      .withValues(alpha: 0.35),
-                                  blurRadius: 20,
-                                  spreadRadius: 2,
-                                ),
-                              ],
+                      Container(
+                        width: 62,
+                        height: 62,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.black.withValues(alpha: 0.62),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.45),
+                            width: 1.8,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: item.platform.primaryColor
+                                  .withValues(alpha: 0.30),
+                              blurRadius: 18,
+                              spreadRadius: 1,
                             ),
-                            child: const Center(
-                              child: Padding(
-                                padding: EdgeInsets.only(left: 4),
-                                child: Icon(
-                                  CupertinoIcons.play_fill,
-                                  size: 30,
-                                  color: Colors.white,
-                                ),
-                              ),
+                          ],
+                        ),
+                        child: const Center(
+                          child: Padding(
+                            padding: EdgeInsets.only(left: 4),
+                            child: Icon(
+                              CupertinoIcons.play_fill,
+                              size: 28,
+                              color: Colors.white,
                             ),
                           ),
                         ),
                       ),
                       const SizedBox(height: 10),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(14),
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 5),
-                            color: Colors.black.withValues(alpha: 0.5),
-                            child: const Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(CupertinoIcons.play_arrow,
-                                    size: 12, color: Colors.white),
-                                SizedBox(width: 4),
-                                Text(
-                                  'Assistir no feed',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.65),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(CupertinoIcons.play_arrow,
+                                size: 12, color: Colors.white),
+                            SizedBox(width: 4),
+                            Text(
+                              'Assistir no feed',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
-                          ),
+                          ],
                         ),
                       ),
                     ],
@@ -1007,22 +995,19 @@ class _UnifiedPostCardState extends State<UnifiedPostCard>
                 Positioned(
                   right: 12,
                   top: 12,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(14),
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 4),
-                        color: Colors.black.withValues(alpha: 0.6),
-                        child: Text(
-                          '${_imageIndex + 1}/${media.length}',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.68),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Text(
+                      '${_imageIndex + 1}/${media.length}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ),

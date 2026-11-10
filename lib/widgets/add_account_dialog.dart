@@ -43,6 +43,12 @@ class _AddAccountDialogState extends State<AddAccountDialog> {
       {'user': 'billgates', 'name': 'Bill Gates', 'followers': '64M'},
       {'user': 'barackobama', 'name': 'Barack Obama', 'followers': '131M'},
     ],
+    SocialPlatform.youtube: [
+      {'user': 'MrBeast', 'name': 'MrBeast', 'followers': '340M'},
+      {'user': 'NASA', 'name': 'NASA', 'followers': '12M'},
+      {'user': 'veritasium', 'name': 'Veritasium', 'followers': '16M'},
+      {'user': 'MarquesBrownlee', 'name': 'MKBHD', 'followers': '19M'},
+    ],
   };
 
   @override
@@ -157,27 +163,52 @@ class _AddAccountDialogState extends State<AddAccountDialog> {
                 ),
                 const SizedBox(height: 16),
 
-                // SELETOR DE PLATAFORMA (Liquid Glass Pills)
-                DropdownButtonFormField<SocialPlatform>(
-                  initialValue: selectedPlatform,
-                  decoration: const InputDecoration(labelText: 'Rede'),
-                  items: [
-                    for (final platform in SocialPlatform.values)
-                      DropdownMenuItem(
-                        value: platform,
-                        child: Text(platform.displayName),
-                      ),
-                  ],
-                  onChanged: isLoading
-                      ? null
-                      : (platform) {
-                          if (platform == null) return;
-                          setState(() {
-                            selectedPlatform = platform;
-                            previewAccount = null;
-                            errorMessage = null;
-                          });
-                        },
+                // SELETOR DE PLATAFORMA (Pills Modernos)
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      for (final platform in SocialPlatform.values) ...[
+                        Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: ChoiceChip(
+                            showCheckmark: false,
+                            avatar: Icon(
+                              platform.iconData,
+                              size: 14,
+                              color: selectedPlatform == platform
+                                  ? Colors.white
+                                  : platform.primaryColor,
+                            ),
+                            label: Text(
+                              platform.shortName,
+                              style: TextStyle(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w700,
+                                color: selectedPlatform == platform
+                                    ? Colors.white
+                                    : null,
+                              ),
+                            ),
+                            selected: selectedPlatform == platform,
+                            selectedColor: platform.primaryColor,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            onSelected: isLoading
+                                ? null
+                                : (_) {
+                                    setState(() {
+                                      selectedPlatform = platform;
+                                      previewAccount = null;
+                                      errorMessage = null;
+                                    });
+                                  },
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 16),
 

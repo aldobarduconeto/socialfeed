@@ -48,10 +48,11 @@ class StorageService {
     await prefs.setString(_accountsKey, jsonEncode(jsonList));
   }
 
-  static Future<void> addAccount(SocialAccount account) =>
+  static Future<List<SocialAccount>> addAccount(SocialAccount account) =>
       addAccounts([account]);
 
-  static Future<void> addAccounts(List<SocialAccount> additions) async {
+  static Future<List<SocialAccount>> addAccounts(
+      List<SocialAccount> additions) async {
     final accounts = await loadAccounts();
     for (final account in additions) {
       final index = accounts.indexWhere(
@@ -69,15 +70,18 @@ class StorageService {
       }
     }
     await saveAccounts(accounts);
+    return accounts;
   }
 
-  static Future<void> removeAccount(String accountId) async {
+  static Future<List<SocialAccount>> removeAccount(String accountId) async {
     final accounts = await loadAccounts();
     accounts.removeWhere((a) => a.id == accountId);
     await saveAccounts(accounts);
+    return accounts;
   }
 
-  static Future<void> toggleAccountActive(String accountId) async {
+  static Future<List<SocialAccount>> toggleAccountActive(
+      String accountId) async {
     final accounts = await loadAccounts();
     final idx = accounts.indexWhere((a) => a.id == accountId);
     if (idx != -1) {
@@ -85,6 +89,7 @@ class StorageService {
       accounts[idx] = current.copyWith(isActive: !current.isActive);
       await saveAccounts(accounts);
     }
+    return accounts;
   }
 
   static Future<List<FeedItem>> loadCachedFeed() async {

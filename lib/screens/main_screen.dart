@@ -129,16 +129,14 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Future<void> _followSearchResults(List<SocialAccount> accounts) async {
-    await StorageService.addAccounts(accounts);
-    final updated = await StorageService.loadAccounts();
+    final updated = await StorageService.addAccounts(accounts);
     if (!mounted) return;
     setState(() => _accounts = updated);
     unawaited(_refreshContent());
   }
 
   Future<void> _addAccount(SocialAccount newAccount) async {
-    await StorageService.addAccount(newAccount);
-    final updated = await StorageService.loadAccounts();
+    final updated = await StorageService.addAccount(newAccount);
     if (!mounted) return;
     setState(() {
       _accounts = updated;
@@ -149,20 +147,21 @@ class _MainScreenState extends State<MainScreen> {
         SnackBar(
           content: Row(
             children: [
-              const Icon(CupertinoIcons.shield_lefthalf_fill,
+              const Icon(CupertinoIcons.checkmark_seal_fill,
                   color: Colors.white, size: 18),
-              const SizedBox(width: 8),
+              const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  'Seguindo @${newAccount.username} (${newAccount.platform.shortName}) no SocialFeed.',
+                  'Seguindo @${newAccount.username} (${newAccount.platform.shortName})',
+                  style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
               ),
             ],
           ),
-          backgroundColor: const Color(0xFF6C5CE7),
+          backgroundColor: const Color(0xFF635BFF),
           behavior: SnackBarBehavior.floating,
           shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
           duration: const Duration(seconds: 3),
         ),
       );
@@ -172,8 +171,7 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Future<void> _removeAccount(String accountId) async {
-    await StorageService.removeAccount(accountId);
-    final updated = await StorageService.loadAccounts();
+    final updated = await StorageService.removeAccount(accountId);
     if (!mounted) return;
     setState(() {
       _accounts = updated;
@@ -182,10 +180,10 @@ class _MainScreenState extends State<MainScreen> {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Conta removida com sucesso.'),
+          content: const Text('Conta removida do seu feed.'),
           behavior: SnackBarBehavior.floating,
           shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
           duration: const Duration(seconds: 2),
         ),
       );
@@ -195,8 +193,7 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Future<void> _toggleAccount(String accountId) async {
-    await StorageService.toggleAccountActive(accountId);
-    final updated = await StorageService.loadAccounts();
+    final updated = await StorageService.toggleAccountActive(accountId);
     if (!mounted) return;
     setState(() {
       _accounts = updated;
@@ -258,70 +255,165 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.sizeOf(context).width;
-    final useDrawer = width >= 600;
-    final pinDrawer = width >= 1100;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final useDrawer = width >= 640;
+    final pinDrawer = width >= 1040;
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+    final activeCount = _accounts.where((a) => a.isActive).length;
 
     return LiquidBackground(
       child: Scaffold(
         key: _scaffoldKey,
         backgroundColor: Colors.transparent,
         extendBody: !useDrawer,
-
         appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(64),
-          child: ClipRRect(
+          preferredSize: const Size.fromHeight(62),
+          child: ClipRect(
             child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-              child: AppBar(
-                backgroundColor: isDark
-                    ? Colors.black.withValues(alpha: 0.25)
-                    : Colors.white.withValues(alpha: 0.55),
-                elevation: 0,
-                scrolledUnderElevation: 0,
-                title: Row(
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(6),
-                      child: Image.asset('assets/icon/socialfeed.png',
-                          width: 24, height: 24),
+              filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? const Color(0xFF090B10).withValues(alpha: 0.72)
+                      : Colors.white.withValues(alpha: 0.78),
+                  border: Border(
+                    bottom: BorderSide(
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.06)
+                          : Colors.black.withValues(alpha: 0.05),
                     ),
-                    const SizedBox(width: 10),
-                    Text(
-                      'SocialFeed',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w900,
-                        fontSize: 21,
-                        letterSpacing: -0.5,
-                        color: isDark ? Colors.white : const Color(0xFF1E1E2F),
+                  ),
+                ),
+                child: AppBar(
+                  backgroundColor: Colors.transparent,
+                  elevation: 0,
+                  scrolledUnderElevation: 0,
+                  titleSpacing: pinDrawer ? 24 : 16,
+                  title: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(5),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF635BFF), Color(0xFF8B80FF)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF635BFF)
+                                  .withValues(alpha: 0.28),
+                              blurRadius: 10,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(5),
+                          child: Image.asset(
+                            'assets/icon/socialfeed.png',
+                            width: 18,
+                            height: 18,
+                            errorBuilder: (_, __, ___) => const Icon(
+                              CupertinoIcons.square_stack_3d_up_fill,
+                              size: 16,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        'SocialFeed',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 19,
+                          letterSpacing: -0.5,
+                          color:
+                              isDark ? Colors.white : const Color(0xFF111420),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      if (activeCount > 0)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: colors.primary.withValues(alpha: 0.10),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            '$activeCount ${activeCount == 1 ? 'ativo' : 'ativos'}',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: colors.primary,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  actions: [
+                    if (_isLoading)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const SizedBox(
+                              width: 15,
+                              height: 15,
+                              child: CupertinoActivityIndicator(radius: 7.5),
+                            ),
+                            if (width >= 420) ...[
+                              const SizedBox(width: 8),
+                              Text(
+                                'Sincronizando',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color:
+                                      isDark ? Colors.white60 : Colors.black54,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      )
+                    else
+                      IconButton(
+                        icon:
+                            const Icon(CupertinoIcons.arrow_clockwise, size: 19),
+                        tooltip: 'Atualizar feed',
+                        onPressed: _refreshContent,
+                      ),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 12, left: 4),
+                      child: FilledButton.tonalIcon(
+                        style: FilledButton.styleFrom(
+                          backgroundColor:
+                              colors.primary.withValues(alpha: 0.12),
+                          foregroundColor: colors.primary,
+                          visualDensity: VisualDensity.compact,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 8),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        onPressed: _showAddAccountDialog,
+                        icon: const Icon(CupertinoIcons.add, size: 15),
+                        label: const Text(
+                          'Seguindo',
+                          style: TextStyle(
+                              fontSize: 12.5, fontWeight: FontWeight.w700),
+                        ),
                       ),
                     ),
                   ],
                 ),
-                actions: [
-                  if (_isLoading)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 14),
-                      child: SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CupertinoActivityIndicator(),
-                      ),
-                    )
-                  else
-                    IconButton(
-                      icon: const Icon(CupertinoIcons.arrow_clockwise),
-                      tooltip: 'Atualizar feed unificado',
-                      onPressed: () => _refreshContent(),
-                    ),
-                  IconButton(
-                    icon: const Icon(CupertinoIcons.plus_circle_fill),
-                    tooltip: 'Adicionar conta',
-                    color: const Color(0xFF6C5CE7),
-                    onPressed: _showAddAccountDialog,
-                  ),
-                  const SizedBox(width: 6),
-                ],
               ),
             ),
           ),
@@ -329,72 +421,81 @@ class _MainScreenState extends State<MainScreen> {
         drawer: useDrawer && !pinDrawer ? _buildDrawer(modal: true) : null,
         body: SafeArea(
           bottom: useDrawer,
-          child: Row(children: [
-            if (pinDrawer)
-              SizedBox(width: 248, child: _buildDrawer(modal: false)),
-            Expanded(
+          child: Row(
+            children: [
+              if (pinDrawer)
+                SizedBox(
+                  width: 244,
+                  child: _buildSidebar(isDark: isDark, colors: colors),
+                ),
+              Expanded(
                 child: IndexedStack(
-              index: _currentTab,
-              children: [
-                // 0. Feed Unificado Liquid Glass
-                if (_visitedTabs.contains(0))
-                  TickerMode(
-                      enabled: _currentTab == 0,
-                      child: FeedScreen(
-                        accounts: _accounts,
-                        feedItems: _feedItems,
-                        stories: const [],
-                        unavailableAccounts: _unavailableAccounts,
-                        bottomPadding: useDrawer ? 24 : 100,
-                        isLoading: _isLoading,
-                        onRefresh: () => _refreshContent(),
-                        onAddAccount: _addAccount,
-                        onNavigateToAccounts: () => _selectTab(2),
-                      ))
-                else
-                  const SizedBox.shrink(),
-                // 1. Busca Invisível / Sem Rastros
-                if (_visitedTabs.contains(1))
-                  TickerMode(
-                      enabled: _currentTab == 1,
-                      child: AnonymousSearchScreen(
-                        currentAccounts: _accounts,
-                        onFollowAccounts: _followSearchResults,
-                        bottomPadding: useDrawer ? 24 : 100,
-                      ))
-                else
-                  const SizedBox.shrink(),
-                // 2. Gerenciamento de Contas
-                if (_visitedTabs.contains(2))
-                  TickerMode(
-                      enabled: _currentTab == 2,
-                      child: AccountsScreen(
-                        accounts: _accounts,
-                        onAddAccount: _addAccount,
-                        onRemoveAccount: _removeAccount,
-                        onToggleAccount: _toggleAccount,
-                        bottomPadding: useDrawer ? 24 : 100,
-                      ))
-                else
-                  const SizedBox.shrink(),
-                // 3. Ajustes
-                if (_visitedTabs.contains(3))
-                  TickerMode(
-                      enabled: _currentTab == 3,
-                      child: SettingsScreen(
-                        currentTheme: widget.currentTheme,
-                        onThemeChanged: widget.onThemeChanged,
-                        onClearCache: _clearCache,
-                        onResetDefaults: _resetDefaults,
-                        bottomPadding: useDrawer ? 24 : 100,
-                      ))
-                else
-                  const SizedBox.shrink(),
-              ],
-            )),
-          ]),
+                  index: _currentTab,
+                  children: [
+                    // 0. Feed Unificado
+                    if (_visitedTabs.contains(0))
+                      TickerMode(
+                        enabled: _currentTab == 0,
+                        child: FeedScreen(
+                          accounts: _accounts,
+                          feedItems: _feedItems,
+                          stories: const [],
+                          unavailableAccounts: _unavailableAccounts,
+                          bottomPadding: useDrawer ? 24 : 100,
+                          isLoading: _isLoading,
+                          onRefresh: _refreshContent,
+                          onAddAccount: _addAccount,
+                          onNavigateToAccounts: () => _selectTab(2),
+                        ),
+                      )
+                    else
+                      const SizedBox.shrink(),
+                    // 1. Busca de Perfis
+                    if (_visitedTabs.contains(1))
+                      TickerMode(
+                        enabled: _currentTab == 1,
+                        child: AnonymousSearchScreen(
+                          currentAccounts: _accounts,
+                          onFollowAccounts: _followSearchResults,
+                          bottomPadding: useDrawer ? 24 : 100,
+                        ),
+                      )
+                    else
+                      const SizedBox.shrink(),
+                    // 2. Gerenciamento de Contas
+                    if (_visitedTabs.contains(2))
+                      TickerMode(
+                        enabled: _currentTab == 2,
+                        child: AccountsScreen(
+                          accounts: _accounts,
+                          onAddAccount: _addAccount,
+                          onRemoveAccount: _removeAccount,
+                          onToggleAccount: _toggleAccount,
+                          bottomPadding: useDrawer ? 24 : 100,
+                        ),
+                      )
+                    else
+                      const SizedBox.shrink(),
+                    // 3. Ajustes
+                    if (_visitedTabs.contains(3))
+                      TickerMode(
+                        enabled: _currentTab == 3,
+                        child: SettingsScreen(
+                          currentTheme: widget.currentTheme,
+                          onThemeChanged: widget.onThemeChanged,
+                          onClearCache: _clearCache,
+                          onResetDefaults: _resetDefaults,
+                          bottomPadding: useDrawer ? 24 : 100,
+                        ),
+                      )
+                    else
+                      const SizedBox.shrink(),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
-        // Floating Liquid Glass Navigation Dock
         bottomNavigationBar: useDrawer
             ? null
             : LiquidGlassNavigationBar(
@@ -415,7 +516,7 @@ class _MainScreenState extends State<MainScreen> {
     LiquidNavItem(
       icon: CupertinoIcons.search,
       selectedIcon: CupertinoIcons.search,
-      label: 'Pesquisa',
+      label: 'Explorar',
     ),
     LiquidNavItem(
       icon: CupertinoIcons.person_2,
@@ -423,11 +524,98 @@ class _MainScreenState extends State<MainScreen> {
       label: 'Contas',
     ),
     LiquidNavItem(
-      icon: CupertinoIcons.settings,
-      selectedIcon: CupertinoIcons.settings_solid,
+      icon: CupertinoIcons.slider_horizontal_3,
+      selectedIcon: CupertinoIcons.slider_horizontal_3,
       label: 'Ajustes',
     ),
   ];
+
+  Widget _buildSidebar({required bool isDark, required ColorScheme colors}) {
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark
+            ? const Color(0xFF0D1017).withValues(alpha: 0.65)
+            : Colors.white.withValues(alpha: 0.65),
+        border: Border(
+          right: BorderSide(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.06)
+                : Colors.black.withValues(alpha: 0.05),
+          ),
+        ),
+      ),
+      padding: const EdgeInsets.fromLTRB(14, 20, 14, 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            child: Text(
+              'NAVEGAÇÃO',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1.0,
+                color: isDark ? Colors.white38 : Colors.black45,
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          for (final (index, dest) in _destinations.indexed) ...[
+            _SidebarItem(
+              item: dest,
+              isSelected: _currentTab == index,
+              badge: index == 2 && _accounts.isNotEmpty
+                  ? '${_accounts.length}'
+                  : null,
+              onTap: () => _selectTab(index),
+            ),
+            const SizedBox(height: 4),
+          ],
+          const Spacer(),
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: colors.primary.withValues(alpha: isDark ? 0.12 : 0.07),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: colors.primary.withValues(alpha: 0.18),
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(CupertinoIcons.sparkles,
+                        size: 15, color: colors.primary),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Feed Unificado',
+                      style: TextStyle(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w700,
+                        color: colors.primary,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Acompanhe Instagram, TikTok, X e YouTube sem algoritmos.',
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    height: 1.35,
+                    color: isDark ? Colors.white60 : Colors.black54,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildDrawer({required bool modal}) => NavigationDrawer(
         selectedIndex: _currentTab,
@@ -437,8 +625,14 @@ class _MainScreenState extends State<MainScreen> {
         },
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(28, 28, 28, 20),
-            child: Text('Menu', style: Theme.of(context).textTheme.titleLarge),
+            padding: const EdgeInsets.fromLTRB(28, 28, 28, 16),
+            child: Text(
+              'SocialFeed',
+              style: Theme.of(context)
+                  .textTheme
+                  .titleLarge
+                  ?.copyWith(fontWeight: FontWeight.w800),
+            ),
           ),
           for (final destination in _destinations)
             NavigationDrawerDestination(
@@ -448,4 +642,87 @@ class _MainScreenState extends State<MainScreen> {
             ),
         ],
       );
+}
+
+class _SidebarItem extends StatelessWidget {
+  final LiquidNavItem item;
+  final bool isSelected;
+  final String? badge;
+  final VoidCallback onTap;
+
+  const _SidebarItem({
+    required this.item,
+    required this.isSelected,
+    this.badge,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final isDark = colors.brightness == Brightness.dark;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            color: isSelected
+                ? colors.primary.withValues(alpha: isDark ? 0.18 : 0.10)
+                : Colors.transparent,
+          ),
+          child: Row(
+            children: [
+              Icon(
+                isSelected ? item.selectedIcon : item.icon,
+                size: 19,
+                color: isSelected
+                    ? colors.primary
+                    : (isDark ? Colors.white70 : Colors.black87),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  item.label,
+                  style: TextStyle(
+                    fontSize: 13.5,
+                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                    color: isSelected
+                        ? colors.primary
+                        : (isDark ? Colors.white : Colors.black87),
+                  ),
+                ),
+              ),
+              if (badge != null)
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? colors.primary
+                        : (isDark ? Colors.white12 : Colors.black12),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    badge!,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: isSelected
+                          ? Colors.white
+                          : (isDark ? Colors.white70 : Colors.black87),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }

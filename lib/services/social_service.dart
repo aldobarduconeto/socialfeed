@@ -261,14 +261,27 @@ class SocialService {
   }
 
   static final _channelIdPattern = RegExp(r'^UC[\w-]{22}$');
+  static final _videoIdPattern = RegExp(r'^[\w-]{11}$');
+  static final _ytInitialDataPattern =
+      RegExp(r'var ytInitialData\s*=\s*(\{[\s\S]*?\});\s*</script>');
+  static final _externalChannelIdPattern =
+      RegExp(r'"externalId"\s*:\s*"(UC[\w-]{22})"');
+  static final _hrefPattern =
+      RegExp(r'''\bhref\s*=\s*["']([^"']+)["']''', caseSensitive: false);
+  static final _scriptPattern =
+      RegExp(r'<script\b([^>]*)>([\s\S]*?)</script>', caseSensitive: false);
+  static final _serverHandlePattern = RegExp(r's\.handle\((\{[\s\S]*?\})\);');
+  static final _metaTagPattern = RegExp(r'<meta\b[^>]*>', caseSensitive: false);
+  static final _metaAttrPattern =
+      RegExp(r"""([\w:-]+)\s*=\s*(?:"([^"]*)"|'([^']*)')""");
+  static final _htmlEntityPattern = RegExp(r'&#(x[0-9a-fA-F]+|[0-9]+);');
+
   static const _atom = 'http://www.w3.org/2005/Atom';
   static const _youtube = 'http://www.youtube.com/xml/schemas/2015';
   static const _media = 'http://search.yahoo.com/mrss/';
 
   static Map<String, dynamic> _youtubePageData(String html) {
-    final json = RegExp(r'var ytInitialData\s*=\s*(\{[\s\S]*?\});\s*</script>')
-        .firstMatch(html)
-        ?.group(1);
+    final json = _ytInitialDataPattern.firstMatch(html)?.group(1);
     if (json == null) return {};
     return jsonDecode(json) as Map<String, dynamic>;
   }
@@ -283,9 +296,10 @@ class SocialService {
   static List<FeedItem> _youtubePageVideos(SocialAccount account, String html) {
     final data = _youtubePageData(html);
     final tabs = data['contents']?['twoColumnBrowseResultsRenderer']?['tabs'];
-    if (tabs is! List)
+    if (tabs is! List) {
       throw const FormatException(
           'A aba pública de vídeos não está disponível.');
+    }
     final selected = tabs
         .whereType<Map>()
         .map((tab) => tab['tabRenderer'])
@@ -302,7 +316,7 @@ class SocialService {
       final video = content?['videoRenderer'];
       final id = lockup?['contentId'] ?? video?['videoId'];
       if (id is! String ||
-          !RegExp(r'^[\w-]{11}$').hasMatch(id) ||
+          !_videoIdPattern.hasMatch(id) ||
           (lockup != null &&
               lockup['contentType'] != 'LOCKUP_CONTENT_TYPE_VIDEO')) {
         continue;
@@ -335,9 +349,7 @@ class SocialService {
     if (_channelIdPattern.hasMatch(username)) return username;
     final html = await _youtubeVideosPage(username, client: client);
     final id = _metadata(html)['channelId'] ??
-        RegExp(r'"externalId"\s*:\s*"(UC[\w-]{22})"')
-            .firstMatch(html)
-            ?.group(1);
+        _externalChannelIdPattern.firstMatch(html)?.group(1);
     if (id == null || !_channelIdPattern.hasMatch(id)) {
       throw const FormatException('Canal público não confirmado.');
     }
@@ -490,8 +502,6 @@ class SocialService {
     };
     final postPath = RegExp(path, caseSensitive: false);
     final posts = <String, Uri>{};
-    final links =
-        RegExp(r'''\bhref\s*=\s*["']([^"']+)["']''', caseSensitive: false);
     for (final uri in sources) {
       final String html;
       try {
@@ -512,7 +522,7 @@ class SocialService {
           }
         }
       }
-      for (final link in links.allMatches(html)) {
+      for (final link in _hrefPattern.allMatches(html)) {
         final reference = Uri.tryParse(link.group(1)!);
         if (reference == null) continue;
         final uri = profile.resolveUri(reference);
@@ -547,14 +557,12 @@ class SocialService {
   }
 
   static Iterable<Map<String, dynamic>> _embeddedObjects(String html) sync* {
-    final scripts =
-        RegExp(r'<script\b([^>]*)>([\s\S]*?)</script>', caseSensitive: false);
-    for (final script in scripts.allMatches(html)) {
+    for (final script in _scriptPattern.allMatches(html)) {
       final attributes = script.group(1)!;
       final body = script.group(2)!;
       final serverPayload = (body.contains('display_url') ||
               body.contains('image_versions2'))
-          ? RegExp(r's\.handle\((\{[\s\S]*?\})\);').firstMatch(body)?.group(1)
+          ? _serverHandlePattern.firstMatch(body)?.group(1)
           : null;
       if (serverPayload == null &&
           (!attributes.contains('application/json') &&
@@ -862,22 +870,20 @@ class SocialService {
 
   static Map<String, String> _metadata(String html) {
     final metadata = <String, String>{};
-    final attribute = RegExp(r"""([\w:-]+)\s*=\s*(?:"([^"]*)"|'([^']*)')""");
-    for (final match
-        in RegExp(r'<meta\b[^>]*>', caseSensitive: false).allMatches(html)) {
+    for (final match in _metaTagPattern.allMatches(html)) {
       final attributes = {
-        for (final part in attribute.allMatches(match.group(0)!))
+        for (final part in _metaAttrPattern.allMatches(match.group(0)!))
           part.group(1)!.toLowerCase(): part.group(2) ?? part.group(3)!,
       };
       final key = attributes['property'] ??
           attributes['name'] ??
           attributes['itemprop'];
       final value = attributes['content'];
-      if (key != null && value != null)
+      if (key != null && value != null) {
         metadata.putIfAbsent(
             key,
-            () => value.replaceAllMapped(RegExp(r'&#(x[0-9a-fA-F]+|[0-9]+);'),
-                    (match) {
+            () => value
+                .replaceAllMapped(_htmlEntityPattern, (match) {
                   final entity = match.group(1)!;
                   final hex = entity.startsWith('x');
                   final code = int.tryParse(hex ? entity.substring(1) : entity,
@@ -885,7 +891,9 @@ class SocialService {
                   return code != null && code <= 0x10ffff
                       ? String.fromCharCode(code)
                       : match.group(0)!;
-                }).replaceAll('&amp;', '&'));
+                })
+                .replaceAll('&amp;', '&'));
+      }
     }
     return metadata;
   }

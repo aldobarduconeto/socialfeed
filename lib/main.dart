@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/main_screen.dart';
@@ -42,7 +41,7 @@ class _SocialFeedAppState extends State<SocialFeedApp> {
 
   @override
   Widget build(BuildContext context) {
-    const primaryColor = Color(0xFF6C5CE7);
+    const primaryColor = Color(0xFF635BFF);
 
     return MaterialApp(
       title: 'SocialFeed',
@@ -53,21 +52,31 @@ class _SocialFeedAppState extends State<SocialFeedApp> {
         brightness: Brightness.light,
         colorScheme: ColorScheme.fromSeed(
           seedColor: primaryColor,
+          primary: primaryColor,
           brightness: Brightness.light,
+          surface: const Color(0xFFFFFFFF),
         ),
-        scaffoldBackgroundColor: const Color(0xFFF3F5FA),
+        scaffoldBackgroundColor: const Color(0xFFF6F7FB),
         splashFactory: NoSplash.splashFactory,
         highlightColor: Colors.transparent,
+        dividerTheme: DividerThemeData(
+          color: Colors.black.withValues(alpha: 0.06),
+          thickness: 1,
+          space: 1,
+        ),
         appBarTheme: const AppBarTheme(
           elevation: 0,
+          scrolledUnderElevation: 0,
           backgroundColor: Colors.transparent,
           surfaceTintColor: Colors.transparent,
         ),
         cardTheme: CardThemeData(
-          color: Colors.white.withValues(alpha: 0.65),
+          color: Colors.white.withValues(alpha: 0.88),
           elevation: 0,
+          margin: EdgeInsets.zero,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(20),
+            side: BorderSide(color: Colors.black.withValues(alpha: 0.06)),
           ),
         ),
       ),
@@ -76,21 +85,31 @@ class _SocialFeedAppState extends State<SocialFeedApp> {
         brightness: Brightness.dark,
         colorScheme: ColorScheme.fromSeed(
           seedColor: primaryColor,
+          primary: const Color(0xFF7C74FF),
           brightness: Brightness.dark,
+          surface: const Color(0xFF12151E),
         ),
-        scaffoldBackgroundColor: const Color(0xFF0B0D14),
+        scaffoldBackgroundColor: const Color(0xFF090B10),
         splashFactory: NoSplash.splashFactory,
         highlightColor: Colors.transparent,
+        dividerTheme: DividerThemeData(
+          color: Colors.white.withValues(alpha: 0.07),
+          thickness: 1,
+          space: 1,
+        ),
         appBarTheme: const AppBarTheme(
           elevation: 0,
+          scrolledUnderElevation: 0,
           backgroundColor: Colors.transparent,
           surfaceTintColor: Colors.transparent,
         ),
         cardTheme: CardThemeData(
-          color: const Color(0xFF161922).withValues(alpha: 0.6),
+          color: const Color(0xFF12151E).withValues(alpha: 0.88),
           elevation: 0,
+          margin: EdgeInsets.zero,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(20),
+            side: BorderSide(color: Colors.white.withValues(alpha: 0.07)),
           ),
         ),
       ),
