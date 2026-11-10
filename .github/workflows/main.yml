@@ -41,7 +41,9 @@ jobs:
 
       # Build APK
       - name: Build Android APK
-        run: flutter build apk --release
+        run: |
+          flutter build apk --release
+          cp build/app/outputs/flutter-apk/app-release.apk socialfeed-android.apk
 
       # Build Linux Desktop & Package .deb
       - name: Build Linux Desktop
@@ -93,7 +95,7 @@ jobs:
         with:
           name: ubuntu-artifacts
           path: |
-            build/app/outputs/flutter-apk/app-release.apk
+            socialfeed-android.apk
             socialfeed-linux.deb
 
   # ==========================================
@@ -228,6 +230,7 @@ jobs:
         run: |
           cd release_assets
           [ -f "app-release.apk" ] && mv app-release.apk socialfeed-android.apk
+          [ -f "build/app/outputs/flutter-apk/app-release.apk" ] && mv build/app/outputs/flutter-apk/app-release.apk socialfeed-android.apk
           ls -la
 
       - name: Create GitHub Release
