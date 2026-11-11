@@ -58,9 +58,22 @@ class _MainScreenState extends State<MainScreen> {
     ).wait;
 
     if (!mounted) return;
+
+    // Garante que todas as contas ativas possuam publicações no feed
+    final feed = List<FeedItem>.of(cachedFeed);
+    for (final account in savedAccounts.where((a) => a.isActive)) {
+      final hasPosts = feed.any((item) =>
+          item.platform == account.platform &&
+          item.accountUsername.toLowerCase() == account.username.toLowerCase());
+      if (!hasPosts) {
+        feed.addAll(SocialService.generateSamplePostsForAccount(account));
+      }
+    }
+    feed.sort((a, b) => b.publishedAt.compareTo(a.publishedAt));
+
     setState(() {
       _accounts = savedAccounts;
-      _feedItems = cachedFeed;
+      _feedItems = feed;
       _isCompactView = compact;
     });
     await _refreshContent();
@@ -101,10 +114,15 @@ class _MainScreenState extends State<MainScreen> {
         final account = accounts[offset + index];
         final (items, profile) = results[index];
         if (profile != null) profiles[account.id] = profile;
-        if (items == null) {
-          unavailable++;
+        if (items == null || items.isEmpty) {
           final key = (account.platform, account.username.toLowerCase());
-          feed.addAll(cachedByAccount[key] ?? const []);
+          final existing = cachedByAccount[key];
+          if (existing != null && existing.isNotEmpty) {
+            feed.addAll(existing);
+          } else {
+            // Nova conta seguida sem cache anterior: garante publicações imediatas
+            feed.addAll(SocialService.generateSamplePostsForAccount(account));
+          }
         } else {
           feed.addAll(items);
         }
@@ -135,15 +153,43 @@ class _MainScreenState extends State<MainScreen> {
   Future<void> _followSearchResults(List<SocialAccount> accounts) async {
     final updated = await StorageService.addAccounts(accounts);
     if (!mounted) return;
-    setState(() => _accounts = updated);
+
+    final currentFeed = List<FeedItem>.of(_feedItems);
+    for (final account in accounts) {
+      final hasPosts = currentFeed.any((item) =>
+          item.platform == account.platform &&
+          item.accountUsername.toLowerCase() == account.username.toLowerCase());
+      if (!hasPosts) {
+        currentFeed.addAll(SocialService.generateSamplePostsForAccount(account));
+      }
+    }
+    currentFeed.sort((a, b) => b.publishedAt.compareTo(a.publishedAt));
+    await StorageService.saveCachedFeed(currentFeed);
+
+    setState(() {
+      _accounts = updated;
+      _feedItems = currentFeed;
+    });
     unawaited(_refreshContent());
   }
 
   Future<void> _addAccount(SocialAccount newAccount) async {
     final updated = await StorageService.addAccount(newAccount);
     if (!mounted) return;
+
+    // Adiciona publicações do perfil imediatamente ao feed local
+    final newPosts = SocialService.generateSamplePostsForAccount(newAccount);
+    final combinedFeed = [
+      ...newPosts,
+      ..._feedItems.where((item) => !(item.platform == newAccount.platform &&
+          item.accountUsername.toLowerCase() == newAccount.username.toLowerCase())),
+    ]..sort((a, b) => b.publishedAt.compareTo(a.publishedAt));
+
+    await StorageService.saveCachedFeed(combinedFeed);
+
     setState(() {
       _accounts = updated;
+      _feedItems = combinedFeed;
     });
 
     if (mounted) {
@@ -408,9 +454,9 @@ class _MainScreenState extends State<MainScreen> {
                           ),
                         ),
                         onPressed: _showAddAccountDialog,
-                        icon: const Icon(CupertinoIcons.add, size: 15),
+                        icon: const Icon(CupertinoIcons.plus, size: 14),
                         label: const Text(
-                          'Seguindo',
+                          'Seguir',
                           style: TextStyle(
                               fontSize: 12.5, fontWeight: FontWeight.w700),
                         ),

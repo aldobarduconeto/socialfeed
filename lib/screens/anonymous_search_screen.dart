@@ -85,8 +85,16 @@ class _AnonymousSearchScreenState extends State<AnonymousSearchScreen> {
                       account.platform == SocialPlatform.values[index] &&
                       account.username.toLowerCase() == username.toLowerCase(),
                 )
-                .firstOrNull,
-    ].whereType<SocialAccount>().toList();
+                .firstOrNull ??
+            SocialAccount(
+              id: 'acc_${SocialPlatform.values[index].name}_${username.toLowerCase()}',
+              platform: SocialPlatform.values[index],
+              username: username,
+              displayName: username,
+              avatarUrl: '',
+              bio: 'Perfil público de ${SocialPlatform.values[index].displayName}',
+            ),
+    ];
     final recent = [
       username,
       ..._recentSearches

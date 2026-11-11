@@ -253,6 +253,34 @@ class _AddAccountDialogState extends State<AddAccountDialog> {
                       style: const TextStyle(color: Colors.red, fontSize: 12),
                     ),
                   ),
+                  TextButton.icon(
+                    style: TextButton.styleFrom(
+                      foregroundColor: selectedPlatform.primaryColor,
+                    ),
+                    onPressed: () {
+                      final clean = SocialService.normalizeUsername(
+                          _usernameController.text);
+                      if (clean.isNotEmpty) {
+                        widget.onAccountAdded(
+                          SocialAccount(
+                            id: 'acc_${selectedPlatform.name}_${clean.toLowerCase()}',
+                            platform: selectedPlatform,
+                            username: clean,
+                            displayName: clean,
+                            avatarUrl: '',
+                            bio:
+                                'Conta de ${selectedPlatform.displayName} adicionada ao SocialFeed.',
+                          ),
+                        );
+                        Navigator.of(context).pop();
+                      }
+                    },
+                    icon: const Icon(CupertinoIcons.plus_circle, size: 16),
+                    label: const Text(
+                      'Adicionar ao feed mesmo assim',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
                 ],
 
                 // PREVIEW DA CONTA ENCONTRADA EM LIQUID GLASS

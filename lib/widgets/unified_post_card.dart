@@ -47,11 +47,13 @@ class _UnifiedPostCardState extends State<UnifiedPostCard>
     _pages = PageController(keepPage: false);
     _isLiked = widget.item.isLiked;
     _likesCount = widget.item.likes;
+    _isSaved = StorageService.isPostSavedSync(widget.item.id, widget.item.platform);
 
-    StorageService.isPostSaved(widget.item.id, widget.item.platform)
-        .then((saved) {
-      if (mounted) setState(() => _isSaved = saved);
-    });
+    if (!_isSaved) {
+      StorageService.isPostSaved(widget.item.id, widget.item.platform).then((saved) {
+        if (mounted && saved != _isSaved) setState(() => _isSaved = saved);
+      });
+    }
 
     _heartAnimController = AnimationController(
       vsync: this,
@@ -833,6 +835,7 @@ class _UnifiedPostCardState extends State<UnifiedPostCard>
                   Image.network(
                     coverUrl,
                     fit: BoxFit.cover,
+                    cacheWidth: 1080,
                     errorBuilder: (_, __, ___) => _buildPlaceholderMedia(item),
                   )
                 else
@@ -1012,6 +1015,7 @@ class _UnifiedPostCardState extends State<UnifiedPostCard>
                   child: Image.network(
                     media[index],
                     fit: BoxFit.cover,
+                    cacheWidth: 1080,
                     errorBuilder: (_, __, ___) => const Center(
                       child: Text('Imagem indisponível'),
                     ),

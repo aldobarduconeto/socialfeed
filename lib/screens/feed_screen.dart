@@ -682,12 +682,12 @@ class _FeedScreenState extends State<FeedScreen> {
     }
 
     return Container(
-      height: 104,
-      margin: const EdgeInsets.only(top: 10, bottom: 2),
+      height: 90,
+      margin: const EdgeInsets.only(top: 8, bottom: 2),
       child: ListView.builder(
         physics: const BouncingScrollPhysics(),
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 14),
         itemCount: 1 + accounts.length,
         itemBuilder: (context, index) {
           if (index == 0) {
@@ -702,62 +702,40 @@ class _FeedScreenState extends State<FeedScreen> {
                       clipBehavior: Clip.none,
                       children: [
                         Container(
-                          width: 62,
-                          height: 62,
+                          width: 54,
+                          height: 54,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             color: isDark
-                                ? const Color(0xFF151822)
+                                ? const Color(0xFF141720)
                                 : Colors.white,
                             border: Border.all(
                               color: isDark
-                                  ? Colors.white.withValues(alpha: 0.10)
+                                  ? Colors.white.withValues(alpha: 0.12)
                                   : Colors.black.withValues(alpha: 0.08),
-                              width: 1.5,
+                              width: 1.2,
                             ),
                           ),
                           child: Center(
                             child: Icon(
-                              CupertinoIcons.person_add,
-                              size: 24,
-                              color: colors.primary,
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          bottom: -1,
-                          right: -1,
-                          child: Container(
-                            padding: const EdgeInsets.all(3.5),
-                            decoration: BoxDecoration(
-                              color: colors.primary,
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: isDark
-                                    ? const Color(0xFF090B10)
-                                    : const Color(0xFFF6F7FB),
-                                width: 2,
-                              ),
-                            ),
-                            child: const Icon(
                               CupertinoIcons.plus,
-                              size: 10,
-                              color: Colors.white,
+                              size: 20,
+                              color: colors.primary,
                             ),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 5),
                     SizedBox(
-                      width: 68,
+                      width: 62,
                       child: Text(
-                        'Novo',
+                        'Seguir',
                         textAlign: TextAlign.center,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: 11.5,
+                          fontSize: 11,
                           fontWeight: FontWeight.w600,
                           color: isDark ? Colors.white70 : Colors.black87,
                         ),
@@ -794,7 +772,7 @@ class _FeedScreenState extends State<FeedScreen> {
                 children: [
                   AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
-                    padding: const EdgeInsets.all(2.4),
+                    padding: const EdgeInsets.all(2.2),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       gradient: (story != null && !story.isSeen) || isSelected
@@ -807,16 +785,6 @@ class _FeedScreenState extends State<FeedScreen> {
                       color: story != null && story.isSeen
                           ? (isDark ? Colors.white24 : Colors.black12)
                           : Colors.transparent,
-                      boxShadow: isSelected
-                          ? [
-                              BoxShadow(
-                                color: account.platform.primaryColor
-                                    .withValues(alpha: 0.45),
-                                blurRadius: 10,
-                                spreadRadius: 1,
-                              ),
-                            ]
-                          : null,
                     ),
                     child: Container(
                       padding: const EdgeInsets.all(2),
@@ -829,7 +797,7 @@ class _FeedScreenState extends State<FeedScreen> {
                       child: Stack(
                         children: [
                           CircleAvatar(
-                            radius: 26.5,
+                            radius: 23,
                             backgroundColor: isDark
                                 ? const Color(0xFF171A24)
                                 : const Color(0xFFECEFF7),
@@ -842,7 +810,7 @@ class _FeedScreenState extends State<FeedScreen> {
                                   : '?',
                               style: TextStyle(
                                 fontWeight: FontWeight.w800,
-                                fontSize: 15,
+                                fontSize: 14,
                                 color: account.platform.primaryColor,
                               ),
                             ),
@@ -851,7 +819,7 @@ class _FeedScreenState extends State<FeedScreen> {
                             bottom: 0,
                             right: 0,
                             child: Container(
-                              padding: const EdgeInsets.all(3),
+                              padding: const EdgeInsets.all(2.5),
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 color: account.platform.primaryColor,
@@ -859,12 +827,12 @@ class _FeedScreenState extends State<FeedScreen> {
                                   color: isDark
                                       ? const Color(0xFF090B10)
                                       : Colors.white,
-                                  width: 1.5,
+                                  width: 1.2,
                                 ),
                               ),
                               child: Icon(
                                 account.platform.iconData,
-                                size: 8,
+                                size: 7.5,
                                 color: Colors.white,
                               ),
                             ),
@@ -873,16 +841,16 @@ class _FeedScreenState extends State<FeedScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 5),
                   SizedBox(
-                    width: 68,
+                    width: 62,
                     child: Text(
                       account.username,
                       textAlign: TextAlign.center,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: 11.5,
+                        fontSize: 11,
                         fontWeight:
                             isSelected ? FontWeight.w800 : FontWeight.w500,
                         color: isSelected
@@ -900,7 +868,7 @@ class _FeedScreenState extends State<FeedScreen> {
     );
   }
 
-  /// Barra de Controles: Busca, Filtros de Rede, Mídia e Ordenação
+  /// Barra de Controles: Busca limpa, Filtros em fita única e Ordenação rápida
   Widget _buildControlsBar({
     required BuildContext context,
     required bool isDark,
@@ -909,203 +877,133 @@ class _FeedScreenState extends State<FeedScreen> {
     required int totalCount,
   }) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(14, 4, 14, 6),
+      padding: const EdgeInsets.fromLTRB(14, 4, 14, 8),
       child: Column(
         children: [
-          // Campo de Busca Expansível
-          if (_showSearchBar) ...[
-            Container(
-              margin: const EdgeInsets.only(bottom: 8),
-              decoration: BoxDecoration(
+          // Campo de Busca Moderno e Integrado
+          Container(
+            height: 42,
+            decoration: BoxDecoration(
+              color: isDark
+                  ? const Color(0xFF141720)
+                  : Colors.white.withValues(alpha: 0.95),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
                 color: isDark
-                    ? const Color(0xFF141720)
-                    : Colors.white.withValues(alpha: 0.95),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: isDark
-                      ? Colors.white.withValues(alpha: 0.08)
-                      : Colors.black.withValues(alpha: 0.06),
-                ),
-              ),
-              child: TextField(
-                controller: _searchController,
-                autofocus: true,
-                onChanged: (val) => setState(() => _searchQuery = val.trim()),
-                decoration: InputDecoration(
-                  prefixIcon: const Icon(CupertinoIcons.search, size: 18),
-                  hintText: 'Filtrar por legenda, hashtag ou @criador...',
-                  border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 12,
-                  ),
-                  suffixIcon: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (_searchQuery.isNotEmpty)
-                        IconButton(
-                          icon: const Icon(
-                            CupertinoIcons.xmark_circle_fill,
-                            size: 16,
-                          ),
-                          onPressed: () {
-                            _searchController.clear();
-                            setState(() => _searchQuery = '');
-                          },
-                        ),
-                      IconButton(
-                        icon: const Icon(CupertinoIcons.xmark, size: 16),
-                        onPressed: () {
-                          _searchController.clear();
-                          setState(() {
-                            _searchQuery = '';
-                            _showSearchBar = false;
-                          });
-                        },
-                      ),
-                    ],
-                  ),
-                ),
+                    ? Colors.white.withValues(alpha: 0.08)
+                    : Colors.black.withValues(alpha: 0.06),
               ),
             ),
-          ],
-
-          // Linha de Pílulas de Plataforma + Ação de Busca e Ordenação
-          Row(
-            children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  physics: const BouncingScrollPhysics(),
-                  child: Row(
-                    children: [
-                      for (final platform in [
-                        null,
-                        ...SocialPlatform.values
-                      ]) ...[
-                        _buildFilterPill(
-                          label: platform?.shortName ?? 'Todas',
-                          count: platform == null
-                              ? totalCount
-                              : (counts[platform] ?? 0),
-                          isSelected: _selectedPlatform == platform,
-                          icon: platform?.iconData ??
-                              CupertinoIcons.square_grid_2x2_fill,
-                          brandColor: platform?.primaryColor ?? colors.primary,
-                          isDark: isDark,
-                          onTap: () {
-                            HapticFeedback.selectionClick();
-                            setState(() {
-                              _selectedPlatform = platform;
-                              if (platform != null &&
-                                  _selectedAccountId != null) {
-                                final selected = widget.accounts
-                                    .where((a) => a.id == _selectedAccountId)
-                                    .firstOrNull;
-                                if (selected?.platform != platform) {
-                                  _selectedAccountId = null;
-                                }
-                              }
-                            });
-                          },
-                        ),
-                        const SizedBox(width: 8),
-                      ],
-                    ],
+            child: Row(
+              children: [
+                const SizedBox(width: 12),
+                Icon(CupertinoIcons.search, size: 16, color: colors.primary),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: TextField(
+                    controller: _searchController,
+                    onChanged: (val) => setState(() => _searchQuery = val.trim()),
+                    style: const TextStyle(fontSize: 13),
+                    decoration: InputDecoration(
+                      hintText: 'Filtrar feed, legenda ou @criador...',
+                      hintStyle: TextStyle(
+                        fontSize: 12.5,
+                        color: isDark ? Colors.white38 : Colors.black38,
+                      ),
+                      border: InputBorder.none,
+                      isDense: true,
+                      contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 6),
-              // Botão de Busca
-              IconButton(
-                visualDensity: VisualDensity.compact,
-                tooltip: 'Buscar no feed',
-                icon: Icon(
-                  _showSearchBar
-                      ? CupertinoIcons.search_circle_fill
-                      : CupertinoIcons.search,
-                  size: 20,
-                  color: _searchQuery.isNotEmpty ? colors.primary : null,
+                if (_searchQuery.isNotEmpty)
+                  IconButton(
+                    icon: const Icon(CupertinoIcons.xmark_circle_fill, size: 16),
+                    visualDensity: VisualDensity.compact,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+                    onPressed: () {
+                      _searchController.clear();
+                      setState(() => _searchQuery = '');
+                    },
+                  ),
+                IconButton(
+                  tooltip: 'Ordenar publicações',
+                  icon: Icon(
+                    CupertinoIcons.arrow_up_arrow_down,
+                    size: 16,
+                    color: _sortOption != FeedSortOption.newest
+                        ? colors.primary
+                        : (isDark ? Colors.white60 : Colors.black54),
+                  ),
+                  visualDensity: VisualDensity.compact,
+                  onPressed: _showSortSheet,
                 ),
-                onPressed: () {
-                  setState(() => _showSearchBar = !_showSearchBar);
-                },
-              ),
-              // Botão de Ordenação
-              IconButton(
-                visualDensity: VisualDensity.compact,
-                tooltip: 'Ordenar feed',
-                icon: Icon(
-                  CupertinoIcons.arrow_up_arrow_down,
-                  size: 19,
-                  color: _sortOption != FeedSortOption.newest
-                      ? colors.primary
-                      : null,
-                ),
-                onPressed: _showSortSheet,
-              ),
-            ],
+                const SizedBox(width: 4),
+              ],
+            ),
           ),
 
           const SizedBox(height: 8),
 
-          // Pílulas de Tipo de Mídia (Tudo / Vídeos / Fotos / Texto)
+          // Fita Única de Filtros (Redes Sociais + Tipos de Mídia)
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             physics: const BouncingScrollPhysics(),
             child: Row(
               children: [
+                // Redes
+                for (final platform in [null, ...SocialPlatform.values]) ...[
+                  _buildFilterPill(
+                    label: platform?.shortName ?? 'Todas',
+                    count: platform == null
+                        ? totalCount
+                        : (counts[platform] ?? 0),
+                    isSelected: _selectedPlatform == platform,
+                    icon: platform?.iconData ??
+                        CupertinoIcons.square_grid_2x2_fill,
+                    brandColor: platform?.primaryColor ?? colors.primary,
+                    isDark: isDark,
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      setState(() {
+                        _selectedPlatform = platform;
+                        if (platform != null && _selectedAccountId != null) {
+                          final selected = widget.accounts
+                              .where((a) => a.id == _selectedAccountId)
+                              .firstOrNull;
+                          if (selected?.platform != platform) {
+                            _selectedAccountId = null;
+                          }
+                        }
+                      });
+                    },
+                  ),
+                  const SizedBox(width: 6),
+                ],
+
+                // Separador sutil
+                Container(
+                  height: 18,
+                  width: 1,
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  color: isDark ? Colors.white12 : Colors.black12,
+                ),
+                const SizedBox(width: 4),
+
+                // Tipos de Mídia
                 for (final filter in MediaTypeFilter.values) ...[
-                  GestureDetector(
+                  _buildMediaPill(
+                    filter: filter,
+                    isSelected: _mediaFilter == filter,
+                    colors: colors,
+                    isDark: isDark,
                     onTap: () {
                       HapticFeedback.selectionClick();
                       setState(() => _mediaFilter = filter);
                     },
-                    child: Container(
-                      margin: const EdgeInsets.only(right: 8),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 5),
-                      decoration: BoxDecoration(
-                        color: _mediaFilter == filter
-                            ? colors.primary
-                                .withValues(alpha: isDark ? 0.22 : 0.12)
-                            : (isDark
-                                ? Colors.white.withValues(alpha: 0.04)
-                                : Colors.black.withValues(alpha: 0.03)),
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(
-                          color: _mediaFilter == filter
-                              ? colors.primary.withValues(alpha: 0.35)
-                              : Colors.transparent,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            filter.icon,
-                            size: 12,
-                            color: _mediaFilter == filter
-                                ? colors.primary
-                                : (isDark ? Colors.white60 : Colors.black54),
-                          ),
-                          const SizedBox(width: 5),
-                          Text(
-                            filter.label,
-                            style: TextStyle(
-                              fontSize: 11.5,
-                              fontWeight: _mediaFilter == filter
-                                  ? FontWeight.w700
-                                  : FontWeight.w500,
-                              color: _mediaFilter == filter
-                                  ? colors.primary
-                                  : (isDark ? Colors.white70 : Colors.black87),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
                   ),
+                  const SizedBox(width: 6),
                 ],
               ],
             ),
@@ -1129,14 +1027,14 @@ class _FeedScreenState extends State<FeedScreen> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeOutCubic,
-        padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 7),
+        padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
         decoration: BoxDecoration(
           color: isSelected
               ? brandColor
               : (isDark
                   ? const Color(0xFF141720).withValues(alpha: 0.9)
                   : Colors.white.withValues(alpha: 0.92)),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected
                 ? brandColor
@@ -1145,31 +1043,22 @@ class _FeedScreenState extends State<FeedScreen> {
                     : Colors.black.withValues(alpha: 0.06)),
             width: 1,
           ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: brandColor.withValues(alpha: 0.28),
-                    blurRadius: 10,
-                    offset: const Offset(0, 3),
-                  ),
-                ]
-              : null,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               icon,
-              size: 13,
+              size: 12,
               color: isSelected
                   ? Colors.white
                   : (isDark ? Colors.white70 : Colors.black87),
             ),
-            const SizedBox(width: 6),
+            const SizedBox(width: 5),
             Text(
               label,
               style: TextStyle(
-                fontSize: 12.5,
+                fontSize: 12,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
                 color: isSelected
                     ? Colors.white
@@ -1177,22 +1066,22 @@ class _FeedScreenState extends State<FeedScreen> {
               ),
             ),
             if (count > 0) ...[
-              const SizedBox(width: 6),
+              const SizedBox(width: 5),
               Container(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 5.5, vertical: 1),
+                    const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
                 decoration: BoxDecoration(
                   color: isSelected
                       ? Colors.white.withValues(alpha: 0.22)
                       : (isDark
                           ? Colors.white.withValues(alpha: 0.08)
                           : Colors.black.withValues(alpha: 0.06)),
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
                   '$count',
                   style: TextStyle(
-                    fontSize: 10.5,
+                    fontSize: 10,
                     fontWeight: FontWeight.w700,
                     color: isSelected
                         ? Colors.white
@@ -1201,6 +1090,61 @@ class _FeedScreenState extends State<FeedScreen> {
                 ),
               ),
             ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMediaPill({
+    required MediaTypeFilter filter,
+    required bool isSelected,
+    required ColorScheme colors,
+    required bool isDark,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOutCubic,
+        padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? colors.primary.withValues(alpha: isDark ? 0.22 : 0.12)
+              : (isDark
+                  ? const Color(0xFF141720).withValues(alpha: 0.9)
+                  : Colors.white.withValues(alpha: 0.92)),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isSelected
+                ? colors.primary.withValues(alpha: 0.4)
+                : (isDark
+                    ? Colors.white.withValues(alpha: 0.07)
+                    : Colors.black.withValues(alpha: 0.06)),
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              filter.icon,
+              size: 11.5,
+              color: isSelected
+                  ? colors.primary
+                  : (isDark ? Colors.white60 : Colors.black54),
+            ),
+            const SizedBox(width: 5),
+            Text(
+              filter.label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                color: isSelected
+                    ? colors.primary
+                    : (isDark ? Colors.white70 : Colors.black87),
+              ),
+            ),
           ],
         ),
       ),

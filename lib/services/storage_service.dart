@@ -13,8 +13,18 @@ class StorageService {
   static const String _autoPlayKey = 'sf_autoplay_videos_v1';
   static const String _initializedKey = 'sf_accounts_initialized';
 
+  // Memória cache em runtime para acesso síncrono e O(1) de alta performance
+  static List<SocialAccount>? _memoryAccounts;
+  static List<FeedItem>? _memoryFeed;
+  static List<FeedItem>? _memorySavedPosts;
+  static Set<String>? _memorySavedKeys;
+
   // --- ACCOUNTS ---
-  static Future<List<SocialAccount>> loadAccounts() async {
+  static Future<List<SocialAccount>> loadAccounts({bool forceRefresh = false}) async {
+    if (!forceRefresh && _memoryAccounts != null) {
+      return List.unmodifiable(_memoryAccounts!);
+    }
+
     final prefs = await SharedPreferences.getInstance();
     final isInit = prefs.getBool(_initializedKey) ?? false;
 
@@ -22,17 +32,19 @@ class StorageService {
       final defaultList = getStarterAccounts();
       await saveAccounts(defaultList);
       await prefs.setBool(_initializedKey, true);
+      _memoryAccounts = defaultList;
       return defaultList;
     }
 
     final raw = prefs.getString(_accountsKey);
     if (raw == null || raw.isEmpty) {
+      _memoryAccounts = [];
       return [];
     }
 
     try {
       final List<dynamic> decoded = jsonDecode(raw);
-      return decoded.map((item) {
+      final list = decoded.map((item) {
         final data = item as Map<String, dynamic>;
         if (Uri.tryParse(data['avatarUrl'] as String? ?? '')?.host ==
             'images.unsplash.com') {
@@ -40,12 +52,16 @@ class StorageService {
         }
         return SocialAccount.fromJson(data);
       }).toList();
+      _memoryAccounts = list;
+      return list;
     } catch (_) {
+      _memoryAccounts = [];
       return [];
     }
   }
 
   static Future<void> saveAccounts(List<SocialAccount> accounts) async {
+    _memoryAccounts = List.of(accounts);
     final prefs = await SharedPreferences.getInstance();
     final jsonList = accounts.map((a) => a.toJson()).toList();
     await prefs.setString(_accountsKey, jsonEncode(jsonList));
@@ -56,7 +72,7 @@ class StorageService {
 
   static Future<List<SocialAccount>> addAccounts(
       List<SocialAccount> additions) async {
-    final accounts = await loadAccounts();
+    final accounts = List<SocialAccount>.of(await loadAccounts());
     for (final account in additions) {
       final index = accounts.indexWhere(
         (saved) =>
@@ -77,7 +93,7 @@ class StorageService {
   }
 
   static Future<List<SocialAccount>> removeAccount(String accountId) async {
-    final accounts = await loadAccounts();
+    final accounts = List<SocialAccount>.of(await loadAccounts());
     accounts.removeWhere((a) => a.id == accountId);
     await saveAccounts(accounts);
     return accounts;
@@ -85,7 +101,7 @@ class StorageService {
 
   static Future<List<SocialAccount>> toggleAccountActive(
       String accountId) async {
-    final accounts = await loadAccounts();
+    final accounts = List<SocialAccount>.of(await loadAccounts());
     final idx = accounts.indexWhere((a) => a.id == accountId);
     if (idx != -1) {
       final current = accounts[idx];
@@ -96,46 +112,91 @@ class StorageService {
   }
 
   // --- FEED CACHE ---
-  static Future<List<FeedItem>> loadCachedFeed() async {
+  static Future<List<FeedItem>> loadCachedFeed({bool forceRefresh = false}) async {
+    if (!forceRefresh && _memoryFeed != null) {
+      return List.unmodifiable(_memoryFeed!);
+    }
+
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(_cachedFeedKey);
-    if (raw == null || raw.isEmpty) return [];
+    if (raw == null || raw.isEmpty) {
+      _memoryFeed = [];
+      return [];
+    }
 
     try {
       final List<dynamic> decoded = jsonDecode(raw);
-      return decoded.map((item) => FeedItem.fromJson(item)).toList();
+      final items = decoded.map((item) => FeedItem.fromJson(item)).toList();
+      _memoryFeed = items;
+      return items;
     } catch (_) {
+      _memoryFeed = [];
       return [];
     }
   }
 
   static Future<void> saveCachedFeed(List<FeedItem> items) async {
+    _memoryFeed = List.of(items);
     final prefs = await SharedPreferences.getInstance();
     final toSave = items.map((i) => i.toJson()).toList();
     await prefs.setString(_cachedFeedKey, jsonEncode(toSave));
   }
 
   // --- SAVED / BOOKMARKED POSTS ---
-  static Future<List<FeedItem>> loadSavedPosts() async {
+  static String _postKey(String id, SocialPlatform platform) =>
+      '${platform.name}:$id';
+
+  static Future<List<FeedItem>> loadSavedPosts({bool forceRefresh = false}) async {
+    if (!forceRefresh && _memorySavedPosts != null) {
+      return List.unmodifiable(_memorySavedPosts!);
+    }
+
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(_savedPostsKey);
-    if (raw == null || raw.isEmpty) return [];
+    if (raw == null || raw.isEmpty) {
+      _memorySavedPosts = [];
+      _memorySavedKeys = <String>{};
+      return [];
+    }
 
     try {
       final List<dynamic> decoded = jsonDecode(raw);
-      return decoded.map((item) => FeedItem.fromJson(item)).toList();
+      final posts = decoded.map((item) => FeedItem.fromJson(item)).toList();
+      _memorySavedPosts = posts;
+      _memorySavedKeys = {
+        for (final p in posts) _postKey(p.id, p.platform),
+      };
+      return posts;
     } catch (_) {
+      _memorySavedPosts = [];
+      _memorySavedKeys = <String>{};
       return [];
     }
   }
 
+  static bool isPostSavedSync(String id, SocialPlatform platform) {
+    if (_memorySavedKeys != null) {
+      return _memorySavedKeys!.contains(_postKey(id, platform));
+    }
+    return false;
+  }
+
+  static Future<bool> isPostSaved(String id, SocialPlatform platform) async {
+    if (_memorySavedKeys != null) {
+      return _memorySavedKeys!.contains(_postKey(id, platform));
+    }
+    await loadSavedPosts();
+    return _memorySavedKeys?.contains(_postKey(id, platform)) ?? false;
+  }
+
   static Future<void> savePost(FeedItem item) async {
-    final posts = await loadSavedPosts();
-    final exists = posts.any(
-      (p) => p.id == item.id && p.platform == item.platform,
-    );
-    if (!exists) {
+    final posts = List<FeedItem>.of(await loadSavedPosts());
+    final key = _postKey(item.id, item.platform);
+    if (!posts.any((p) => p.id == item.id && p.platform == item.platform)) {
       posts.insert(0, item);
+      _memorySavedPosts = posts;
+      _memorySavedKeys?.add(key);
+
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(
         _savedPostsKey,
@@ -144,19 +205,18 @@ class StorageService {
     }
   }
 
-  static Future<void> removeSavedPost(String id, SocialPlatform platform) async {
-    final posts = await loadSavedPosts();
+  static Future<void> removeSavedPost(
+      String id, SocialPlatform platform) async {
+    final posts = List<FeedItem>.of(await loadSavedPosts());
     posts.removeWhere((p) => p.id == id && p.platform == platform);
+    _memorySavedPosts = posts;
+    _memorySavedKeys?.remove(_postKey(id, platform));
+
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(
       _savedPostsKey,
       jsonEncode(posts.map((p) => p.toJson()).toList()),
     );
-  }
-
-  static Future<bool> isPostSaved(String id, SocialPlatform platform) async {
-    final posts = await loadSavedPosts();
-    return posts.any((p) => p.id == id && p.platform == platform);
   }
 
   static Future<bool> toggleSavePost(FeedItem item) async {
@@ -171,6 +231,8 @@ class StorageService {
   }
 
   static Future<void> clearAllSavedPosts() async {
+    _memorySavedPosts = [];
+    _memorySavedKeys = <String>{};
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_savedPostsKey);
   }
