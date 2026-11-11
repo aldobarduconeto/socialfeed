@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +9,7 @@ import '../services/storage_service.dart';
 import '../services/social_service.dart';
 import 'feed_screen.dart';
 import 'anonymous_search_screen.dart';
+import 'saved_posts_screen.dart';
 import 'accounts_screen.dart';
 import 'settings_screen.dart';
 import '../widgets/add_account_dialog.dart';
@@ -34,6 +35,7 @@ class _MainScreenState extends State<MainScreen> {
   int _currentTab = 0;
   final _visitedTabs = <int>{0};
   bool _isLoading = false;
+  bool _isCompactView = false;
 
   List<SocialAccount> _accounts = [];
   List<FeedItem> _feedItems = [];
@@ -49,15 +51,17 @@ class _MainScreenState extends State<MainScreen> {
   Future<void> _loadInitialData() async {
     setState(() => _isLoading = true);
 
-    final (savedAccounts, cachedFeed) = await (
+    final (savedAccounts, cachedFeed, compact) = await (
       StorageService.loadAccounts(),
       StorageService.loadCachedFeed(),
+      StorageService.loadCompactView(),
     ).wait;
 
     if (!mounted) return;
     setState(() {
       _accounts = savedAccounts;
       _feedItems = cachedFeed;
+      _isCompactView = compact;
     });
     await _refreshContent();
   }
@@ -442,14 +446,16 @@ class _MainScreenState extends State<MainScreen> {
                           stories: const [],
                           unavailableAccounts: _unavailableAccounts,
                           bottomPadding: useDrawer ? 24 : 100,
+                          isCompact: _isCompactView,
                           isLoading: _isLoading,
                           onRefresh: _refreshContent,
                           onAddAccount: _addAccount,
-                          onNavigateToAccounts: () => _selectTab(2),
+                          onNavigateToAccounts: () => _selectTab(3),
                         ),
                       )
                     else
                       const SizedBox.shrink(),
+
                     // 1. Busca de Perfis
                     if (_visitedTabs.contains(1))
                       TickerMode(
@@ -462,10 +468,23 @@ class _MainScreenState extends State<MainScreen> {
                       )
                     else
                       const SizedBox.shrink(),
-                    // 2. Gerenciamento de Contas
+
+                    // 2. Publicações Salvas
                     if (_visitedTabs.contains(2))
                       TickerMode(
                         enabled: _currentTab == 2,
+                        child: SavedPostsScreen(
+                          bottomPadding: useDrawer ? 24 : 100,
+                          onExploreFeed: () => _selectTab(0),
+                        ),
+                      )
+                    else
+                      const SizedBox.shrink(),
+
+                    // 3. Gerenciamento de Contas
+                    if (_visitedTabs.contains(3))
+                      TickerMode(
+                        enabled: _currentTab == 3,
                         child: AccountsScreen(
                           accounts: _accounts,
                           onAddAccount: _addAccount,
@@ -476,15 +495,24 @@ class _MainScreenState extends State<MainScreen> {
                       )
                     else
                       const SizedBox.shrink(),
-                    // 3. Ajustes
-                    if (_visitedTabs.contains(3))
+
+                    // 4. Ajustes & Insights
+                    if (_visitedTabs.contains(4))
                       TickerMode(
-                        enabled: _currentTab == 3,
+                        enabled: _currentTab == 4,
                         child: SettingsScreen(
                           currentTheme: widget.currentTheme,
                           onThemeChanged: widget.onThemeChanged,
+                          isCompactView: _isCompactView,
+                          onCompactViewChanged: (val) {
+                            setState(() => _isCompactView = val);
+                            StorageService.saveCompactView(val);
+                          },
+                          accounts: _accounts,
+                          feedItems: _feedItems,
                           onClearCache: _clearCache,
                           onResetDefaults: _resetDefaults,
+                          onBackupImported: _loadInitialData,
                           bottomPadding: useDrawer ? 24 : 100,
                         ),
                       )
@@ -517,6 +545,11 @@ class _MainScreenState extends State<MainScreen> {
       icon: CupertinoIcons.search,
       selectedIcon: CupertinoIcons.search,
       label: 'Explorar',
+    ),
+    LiquidNavItem(
+      icon: CupertinoIcons.bookmark,
+      selectedIcon: CupertinoIcons.bookmark_fill,
+      label: 'Salvos',
     ),
     LiquidNavItem(
       icon: CupertinoIcons.person_2,
@@ -565,7 +598,7 @@ class _MainScreenState extends State<MainScreen> {
             _SidebarItem(
               item: dest,
               isSelected: _currentTab == index,
-              badge: index == 2 && _accounts.isNotEmpty
+              badge: index == 3 && _accounts.isNotEmpty
                   ? '${_accounts.length}'
                   : null,
               onTap: () => _selectTab(index),

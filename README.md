@@ -1,85 +1,258 @@
-# SocialFeed
+<div align="center">
 
-<img src="assets/icon/socialfeed.png" alt="Ícone do SocialFeed" width="96">
+  <img src="assets/icon/socialfeed.png" alt="SocialFeed Logo" width="128" height="128" style="border-radius: 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.25);" />
 
-O SocialFeed reúne publicações públicas do Instagram, TikTok, X e YouTube em um feed cronológico. Você escolhe os perfis e canais que quer acompanhar e pode consultar as publicações em um só lugar, sem fazer login nas redes sociais.
+  # SocialFeed
+  
+  **O seu feed unificado, cronológico e 100% privado.**  
+  *Acompanhe Instagram, TikTok, X (Twitter) e YouTube em um só lugar — sem login, sem algoritmos e sem anúncios.*
 
-## Como usar
+  <p align="center">
+    <img src="https://img.shields.io/badge/Flutter-3.x-02569B?style=for-the-badge&logo=flutter&logoColor=white" alt="Flutter" />
+    <img src="https://img.shields.io/badge/Dart-3.x-0175C2?style=for-the-badge&logo=dart&logoColor=white" alt="Dart" />
+    <img src="https://img.shields.io/badge/Plataformas-Android%20%7C%20iOS%20%7C%20Windows%20%7C%20macOS%20%7C%20Linux-4CAF50?style=for-the-badge" alt="Plataformas" />
+    <img src="https://img.shields.io/badge/Privacidade-Zero%20Tracking-FF5722?style=for-the-badge&logo=shield" alt="Privacy First" />
+    <img src="https://img.shields.io/badge/Licen%C3%A7a-MIT-blue?style=for-the-badge" alt="Licença" />
+  </p>
 
-1. Abra **Pesquisa**, digite um `@usuário` ou cole o link de um perfil. O SocialFeed procura o identificador nas redes compatíveis. Nos resultados, toque em **Seguir** para incluir um perfil no seu feed.
-2. Use **+** no cabeçalho para adicionar um perfil de uma rede específica. Para o YouTube, você pode informar o `@handle`, o link ou o ID do canal.
-3. Abra **Feed** para ver as publicações mais recentes. Use os filtros por rede ou por perfil e o botão de atualização no cabeçalho para buscar novas publicações.
-4. Em **Contas**, pause um perfil para retirá-lo temporariamente do feed ou remova-o da lista. Seguir um perfil no SocialFeed salva a escolha apenas no aplicativo.
-5. Em **Ajustes**, escolha o tema claro, escuro ou do sistema, limpe o cache do feed ou restaure a lista inicial de contas.
+  <p align="center">
+    <a href="#-principais-funcionalidades">Funcionalidades</a> •
+    <a href="#-design--experiência-liquid-glass">Design & UI</a> •
+    <a href="#-redes-suportadas">Redes</a> •
+    <a href="#-como-usar">Como Usar</a> •
+    <a href="#-instalação-e-execução">Instalação</a> •
+    <a href="#-arquitetura-do-projeto">Arquitetura</a> •
+    <a href="#-downloads">Downloads</a>
+  </p>
 
-## Fontes de conteúdo
+</div>
 
-| Rede | Conteúdo consultado |
-| --- | --- |
-| Instagram | Publicações e Reels disponíveis nos perfis públicos e nas páginas de incorporação. |
-| TikTok | Vídeos disponíveis nas páginas públicas dos perfis e nas páginas de incorporação. |
-| X | Posts disponíveis na linha do tempo pública incorporada ou na página do perfil. |
-| YouTube | Vídeos recentes do feed Atom público do canal, com consulta à página de vídeos como alternativa quando o feed falha. |
+---
 
-O conteúdo depende do que cada rede retorna em suas páginas públicas. Perfis privados, exigência de login, limites de acesso e mudanças nas páginas podem impedir a atualização. O feed exibe as publicações disponíveis nessas fontes e pode mostrar apenas parte do histórico de um perfil.
+## 💡 Sobre o SocialFeed
 
-Quando a atualização de um perfil falha, o SocialFeed mantém as publicações daquele perfil que já estavam no cache. O aplicativo armazena no dispositivo a lista de contas, o cache do feed, as buscas recentes e a preferência de tema. Consultar novas publicações e carregar mídias remotas exige conexão com a internet.
+O **SocialFeed** foi criado para devolver o controle do seu tempo e da sua atenção. As redes sociais modernas foram desenhadas para prender usuários em loops infinitos de algoritmos de recomendação, anúncios invasivos e coletas massivas de dados.
 
-O player integrado está disponível no Android, iOS, macOS e Windows quando a mídia pode ser carregada diretamente ou incorporada pela rede. No Windows, ele usa o runtime WebView2.
+Com o **SocialFeed**, você consome apenas o conteúdo de perfis públicos que você escolheu explicitamente seguir, reunidos em uma única linha do tempo cronológica e elegante, com reprodução direta e **sem necessidade de criar contas ou fazer login em qualquer plataforma**.
 
-## Executar a partir do código-fonte
+---
 
-Instale o Flutter SDK e configure as ferramentas da plataforma de destino. O projeto inclui os arquivos nativos de Android, iOS, Windows, macOS e Linux.
+## ✨ Principais Funcionalidades
 
-| Destino | Ambiente de desenvolvimento |
-| --- | --- |
-| Android | Android SDK, JDK 17 e emulador ou dispositivo Android. |
-| iOS | macOS com Xcode e simulador ou dispositivo iOS. Um dispositivo físico requer assinatura configurada. |
-| Windows | Windows com Visual Studio e a carga de trabalho de desenvolvimento para desktop com C++. |
-| macOS | macOS com Xcode. |
-| Linux | Linux com Clang, CMake, Ninja, pkg-config e bibliotecas de desenvolvimento do GTK 3. |
+### 🌟 Feed Unificado & Cronológico
+- **Timeline Centralizada**: Veja postagens do Instagram, vídeos do TikTok, threads do X e novidades do YouTube intercaladas ordenadamente por data de publicação.
+- **Zero Algoritmos Viciantes**: As publicações aparecem puramente por ordem cronológica. Sem posts patrocinados e sem sugestões indesejadas.
+- **Filtros por Tipo de Mídia**: Alterne instantaneamente entre visualização de **Tudo**, apenas **Vídeos** (Reels/TikToks/YouTube), apenas **Fotos** ou apenas **Texto** (estilo microblog).
+- **Ordenação Inteligente**: Ordene o feed por *Mais Recentes*, *Mais Curtidos* ou *Mais Comentados*.
+- **Busca em Tempo Real**: Localize qualquer publicação digitando palavras-chave presentes na legenda, nome do autor ou no `@username`.
+- **Botão Inteligente de Rolagem**: Retorne ao topo do feed suavemente com o botão flutuante animado com resposta tátil.
 
-Na raiz do projeto, execute:
+### ⭕ Stories Dinâmicos com Progresso
+- **Extração Automática**: O SocialFeed reúne os destaques e mídias mais recentes dos perfis seguidos em anéis de Stories no topo da tela.
+- **Visualizador Imersivo**: Interface com barras de progresso temporizadas, navegação por gestos de toque lateral e suporte a pausar segurando a tela.
+- **Controle de Visualização**: Anéis com gradientes vibrantes para histórias inéditas e visual sutil para histórias já assistidas.
 
-```sh
-flutter doctor -v
-flutter pub get
-flutter devices
-flutter run -d <id-do-dispositivo>
+### 🖼️ Visualizador Lightbox com Zoom (Até 4.5x)
+- **Pinch-to-Zoom & Pan**: Aproxime imagens com gestos multitoque suaves com suporte até 4.5x de zoom.
+- **Double-Tap Inteligente**: Dois toques rápidos focam e ampliam instantaneamente 2.5x no ponto exato do toque.
+- **Carrosséis Deslizantes**: Navegue entre múltiplas fotos com indicador flutuante translúcido (`1/3`), atalho de cópia do link original e botão para abrir no navegador nativo.
+
+### 🔖 Aba Exclusiva de Salvos (Favoritos)
+- **Marcador com 1 Toque**: Salve qualquer publicação com um toque no ícone de marcador para ler ou assistir mais tarde.
+- **Filtro & Busca nos Salvos**: Encontre publicações salvas rapidamente através de busca por texto e chips de filtro por rede social.
+- **Persistência Total**: Seus favoritos ficam armazenados com segurança no seu próprio dispositivo.
+
+### 👥 Descoberta e Gerenciamento de Perfis
+- **Busca Global Anônima**: Digite qualquer `@arroba` na aba Explorar para encontrar o perfil simultaneamente no Instagram, TikTok, X e YouTube.
+- **Pausa Temporária**: Desative temporariamente um perfil para tirá-lo do feed sem precisar excluí-lo da sua lista.
+- **Totalmente Local**: As contas que você segue nunca são enviadas para servidores remotos.
+
+### 📊 Painel de Métricas & Insights
+- **Dashboard Integrado**: Acompanhe o total de perfis cadastrados, publicações em cache e o engajamento acumulado (curtidas e comentários).
+- **Gráfico de Distribuição**: Barra visual colorida que exibe a porcentagem de conteúdo que cada rede social representa no seu feed.
+
+### 💾 Backup & Restauração Completa
+- **Exportação JSON**: Copie com um toque todo o seu conjunto de contas seguidas e publicações salvas para a área de transferência.
+- **Restauração Rápida**: Transfira sua configuração para outro dispositivo ou recupere seus dados colando o JSON de backup.
+
+### 🗜️ Modo de Visualização Compacto
+- Alterne nas configurações entre os cards visuais imersivos e o layout ultracompacto para leitura rápida.
+
+---
+
+## 🎨 Design & Experiência: Liquid Glass
+
+O SocialFeed adota uma linguagem visual inspirada no **Glassmorphism moderno e na estética fluida**:
+
+| Elemento | Descrição |
+| :--- | :--- |
+| 🫧 **Liquid Background** | Fundo com gradientes orgânicos, orbes de luz e desfoque gaussiano dinâmico que reage ao tema escolhido. |
+| 🪟 **Dock Flutuante de Vidro** | Barra de navegação inferior flutuante (`LiquidGlassNavigationBar`) com efeito de vidro fosco, bordas sutis e indicador ativo que desliza suavemente com física de mola. |
+| 🖥️ **Layout Adaptativo** | Responsivo em qualquer tela: dock flutuante no celular, drawer modal em tablets e sidebar fixa elegante em desktops widescreen. |
+| 🌓 **Temas Dinâmicos** | Alternância em tempo real entre **Modo Escuro Puro** (OLED-friendly), **Modo Claro Refinado** e sincronização automática com o sistema operacional. |
+| 🎬 **Inline Video Player** | Player de vídeo embutido nos próprios cards do feed, sem popups invasivos. |
+
+---
+
+## 🌐 Redes Suportadas
+
+O SocialFeed obtém dados exclusivamente de páginas públicas, sem solicitar suas credenciais:
+
+| Plataforma | Conteúdo Acessado | Player Integrado |
+| :---: | :--- | :---: |
+| <img src="https://api.iconify.design/skill-icons:instagram.svg" width="20" /> **Instagram** | Fotos, Carrosséis, Vídeos e Reels públicos | ✅ |
+| <img src="https://api.iconify.design/logos:tiktok-icon.svg" width="20" /> **TikTok** | Vídeos, legendas e sons de contas abertas | ✅ |
+| <img src="https://api.iconify.design/ri:twitter-x-fill.svg" width="20" /> **X (Twitter)** | Tweets, threads de texto, fotos e vídeos da timeline pública | ✅ |
+| <img src="https://api.iconify.design/logos:youtube-icon.svg" width="20" /> **YouTube** | Uploads recentes, Shorts e metadados via feed RSS/Atom público | ✅ |
+
+> [!NOTE]
+> Por utilizar dados públicos e não exigir autenticação, perfis privados ou conteúdos que exigem confirmação de idade não são exibidos. O app implementa cache offline automático caso uma rede passe por instabilidade temporária.
+
+---
+
+## 📱 Navegação do Aplicativo
+
+A interface é dividida em 5 abas intuitivas:
+
+```text
+┌─────────────────────────────────────────────────────────────┐
+│                      SOCIALFEED                             │
+├─────────┬──────────────┬─────────────┬────────────┬─────────┤
+│  Feed   │   Explorar   │   Salvos    │   Contas   │ Ajustes │
+│  (Home) │   (Busca)    │ (Favoritos) │ (Perfis)   │(Insights│
+└─────────┴──────────────┴─────────────┴────────────┴─────────┘
 ```
 
-Substitua `<id-do-dispositivo>` pelo identificador exibido por `flutter devices`. Se houver apenas um destino disponível, use `flutter run`.
+1. **Feed**: Linha do tempo unificada com stories no topo, filtros rápidos de mídia (Vídeos/Fotos/Texto), busca e ordenação.
+2. **Explorar**: Busque novos criadores em todas as redes ao mesmo tempo sem precisar abrir cada app individualmente.
+3. **Salvos**: Sua biblioteca particular de publicações favoritas para ler ou rever mais tarde, com busca interna.
+4. **Contas**: Gerenciador com status ativo/pausado de cada criador e opção de adicionar novos perfis.
+5. **Ajustes**: Controle de temas, dashboard de métricas, modo compacto, exportação/importação de backups e limpeza de cache.
 
-## Compilar uma versão de lançamento
+---
 
-| Destino | Comando |
-| --- | --- |
-| Android | `flutter build apk --release` |
-| iOS | `flutter build ipa --release` |
-| Windows | `flutter build windows --release` |
-| macOS | `flutter build macos --release` |
-| Linux | `flutter build linux --release` |
+## 🔒 Privacidade e Segurança
 
-- **Android.** O Gradle do projeto usa JDK 17. Se o JDK não for detectado, aponte `SOCIALFEED_JDK17` para o diretório da instalação. O APK é gerado em `build/app/outputs/flutter-apk/app-release.apk`. O projeto usa a chave de depuração nesse build. Configure uma assinatura de produção antes de distribuí-lo.
-- **iOS.** Para gerar o IPA, configure a equipe de desenvolvimento e a assinatura no Xcode.
-- **Windows.** O CMake procura `nuget.exe` no `PATH`. Se ele estiver ausente, o projeto tenta baixar a versão fixada para compilar a dependência do WebView.
+- 🚫 **Sem Login Obrigatório**: Nunca solicitamos seu usuário ou senha de nenhuma rede social.
+- 🛡️ **Zero Rastreamento**: Sem SDKs de telemetria, anúncios, Firebase Analytics ou pixels de rastreamento.
+- 🏠 **Dados 100% Locais**: Contas seguidas, histórico de busca e posts salvos ficam salvos exclusivamente no `SharedPreferences` do seu aparelho.
+- 📦 **Código Aberto**: Você pode inspecionar exatamente o que o aplicativo faz no código-fonte.
 
-## Estrutura do projeto
+---
 
-| Caminho | Responsabilidade |
-| --- | --- |
-| [lib/main.dart](lib/main.dart) | Inicialização do Flutter e configuração dos temas. |
-| [lib/screens/](lib/screens/) | Telas de feed, pesquisa, contas e ajustes. |
-| [lib/models/](lib/models/) | Modelos de perfis, redes sociais e publicações. |
-| [lib/services/social_service.dart](lib/services/social_service.dart) | Busca de perfis e coleta de publicações em fontes públicas. |
-| [lib/services/storage_service.dart](lib/services/storage_service.dart) | Persistência local das contas e do cache do feed. |
-| [lib/widgets/](lib/widgets/) | Cartões, navegação adaptável e player integrado. |
-| [assets/icon/](assets/icon/) | Imagem usada no cabeçalho e como fonte dos ícones nativos. |
+## 🚀 Instalação e Execução
 
-Depois de alterar [assets/icon/socialfeed.png](assets/icon/socialfeed.png), gere novamente os ícones de Android, iOS, Windows e macOS com:
+### Pré-requisitos
+- [Flutter SDK](https://flutter.dev/docs/get-started/install) instalado (versão 3.x recomendada).
+- SDK da plataforma alvo configurado (Android Studio, Xcode, Visual Studio C++, etc.).
 
-```sh
-dart run flutter_launcher_icons
+### Rodando em Modo de Desenvolvimento
+
+1. **Clone o repositório:**
+   ```bash
+   git clone https://github.com/aldobarduconeto/socialfeed.git
+   cd socialfeed
+   ```
+
+2. **Instale as dependências:**
+   ```bash
+   flutter pub get
+   ```
+
+3. **Verifique os dispositivos conectados:**
+   ```bash
+   flutter devices
+   ```
+
+4. **Execute o projeto:**
+   ```bash
+   flutter run -d <id-do-dispositivo>
+   ```
+
+---
+
+## 📦 Compilação para Produção
+
+O SocialFeed é compatível com compilações nativas para todas as plataformas:
+
+| Plataforma | Formato Gerado | Comando de Build |
+| :--- | :--- | :--- |
+| **Android** | `.apk` | `flutter build apk --release` |
+| **Windows** | `.exe` (Inno Setup) | `flutter build windows --release` |
+| **Linux** | `.deb` | `flutter build linux --release` |
+| **macOS** | `.dmg` | `flutter build macos --release` |
+| **iOS** | `.ipa` | `flutter build ipa --release` |
+
+---
+
+## 🏗️ Arquitetura do Projeto
+
+O código segue padrões limpos, divididos por responsabilidade e sem dependência de gerenciadores de estado externos pesados:
+
+```text
+socialfeed/
+├── lib/
+│   ├── main.dart                  # Ponto de entrada, configuração de temas e rotas
+│   ├── models/                    # Modelagem de dados
+│   │   ├── feed_item.dart         # Estrutura unificada de posts, mídias e estatísticas
+│   │   ├── platform_type.dart     # Enum com cores, ícones e metadados das plataformas
+│   │   ├── social_account.dart    # Estrutura dos perfis seguidos
+│   │   └── story_item.dart        # Modelo para stories e status de visualização
+│   ├── screens/                   # Telas principais
+│   │   ├── main_screen.dart       # Shell de navegação responsiva (Dock / Sidebar)
+│   │   ├── feed_screen.dart       # Feed principal com busca, filtros e stories
+│   │   ├── anonymous_search_screen.dart # Busca universal de perfis
+│   │   ├── saved_posts_screen.dart# Aba dedicada de publicações salvas
+│   │   ├── accounts_screen.dart   # Gerenciamento de perfis ativos/pausados
+│   │   └── settings_screen.dart   # Ajustes, métricas, temas e backup
+│   ├── services/                  # Serviços de infraestrutura
+│   │   ├── social_service.dart    # Extratores HTTP e parsers de conteúdo público
+│   │   └── storage_service.dart   # Persistência local (Cache, Salvos, Backup JSON)
+│   └── widgets/                   # Componentes reutilizáveis
+│       ├── unified_post_card.dart # Card completo de postagem (Mídia, Legenda, Ações)
+│       ├── image_viewer_screen.dart # Lightbox com pinch-to-zoom (4.5x) e carrossel
+│       ├── story_viewer_screen.dart # Visualizador de stories em tela cheia com progresso
+│       ├── liquid_glass.dart      # Efeitos visuais de vidro fosco e desfoque
+│       ├── liquid_glass_navigation_bar.dart # Dock inferior flutuante estilizado
+│       ├── liquid_background.dart # Fundo orgânico com iluminação dinâmica
+│       └── feed_video_player.dart # Player de vídeo multiplataforma
+├── .github/workflows/
+│   └── main.yml                   # Pipeline de CI/CD para compilação multi-OS
+└── pubspec.yaml                   # Dependências e metadados do app
 ```
 
-A janela do Linux usa a imagem do pacote de recursos do Flutter. O ícone do cabeçalho também é carregado desse pacote.
+---
+
+## 🤖 Pipeline de CI/CD Multiplataforma
+
+O repositório conta com um workflow automatizado no **GitHub Actions** (`.github/workflows/main.yml`) que compila e empacota simultaneamente todos os instaladores em máquinas virtuais Ubuntu, Windows e macOS a cada nova tag:
+
+- 📱 **Android**: Compilação com JDK 17 e Flutter estável gerando `socialfeed-android.apk`.
+- 🐧 **Linux**: Empacotamento Debian gerando pacote instalável `socialfeed-linux.deb`.
+- 🪟 **Windows**: Compilação Release nativa e geração de instalador via Inno Setup (`SocialFeed-Setup.exe`).
+- 🍏 **macOS**: Bundle nativo empacotado em imagem de disco montável (`socialfeed-macos.dmg`).
+- 📱 **iOS**: Arquivo de distribuição assinado (`socialfeed-ios.ipa`).
+
+Todos os binários gerados são anexados automaticamente nas **GitHub Releases** do projeto.
+
+---
+
+## 🤝 Como Contribuir
+
+Contribuições são muito bem-vindas! Se você deseja sugerir novas funcionalidades, melhorar o visual ou adicionar novos scrapers públicos:
+
+1. Faça um **Fork** do repositório.
+2. Crie uma branch para a sua feature (`git checkout -b feature/nova-funcionalidade`).
+3. Faça commit das suas alterações (`git commit -m 'feat: Adiciona visualizador aprimorado'`).
+4. Envie para o seu fork (`git push origin feature/nova-funcionalidade`).
+5. Abra um **Pull Request**.
+
+---
+
+## 📄 Licença
+
+Este projeto é distribuído sob a licença **MIT**. Consulte o arquivo `LICENSE` para mais detalhes.
+
+<div align="center">
+  <sub>Construído com ❤️ em Flutter para uma web mais livre, rápida e sem distrações.</sub>
+</div>

@@ -1,16 +1,25 @@
-import 'dart:ui';
+﻿import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/feed_item.dart';
 import '../models/platform_type.dart';
+import '../services/storage_service.dart';
 import 'feed_video_player.dart';
+import 'image_viewer_screen.dart';
 
 class UnifiedPostCard extends StatefulWidget {
   final FeedItem item;
+  final bool isCompact;
+  final ValueChanged<bool>? onSavedChanged;
 
-  const UnifiedPostCard({super.key, required this.item});
+  const UnifiedPostCard({
+    super.key,
+    required this.item,
+    this.isCompact = false,
+    this.onSavedChanged,
+  });
 
   @override
   State<UnifiedPostCard> createState() => _UnifiedPostCardState();
@@ -38,6 +47,11 @@ class _UnifiedPostCardState extends State<UnifiedPostCard>
     _pages = PageController(keepPage: false);
     _isLiked = widget.item.isLiked;
     _likesCount = widget.item.likes;
+
+    StorageService.isPostSaved(widget.item.id, widget.item.platform)
+        .then((saved) {
+      if (mounted) setState(() => _isSaved = saved);
+    });
 
     _heartAnimController = AnimationController(
       vsync: this,
@@ -111,6 +125,38 @@ class _UnifiedPostCardState extends State<UnifiedPostCard>
         _likesCount = (_likesCount > 0) ? _likesCount - 1 : 0;
       }
     });
+  }
+
+  Future<void> _toggleSave() async {
+    HapticFeedback.selectionClick();
+    final newSaved = await StorageService.toggleSavePost(widget.item);
+    if (!mounted) return;
+    setState(() => _isSaved = newSaved);
+    widget.onSavedChanged?.call(newSaved);
+    if (mounted) {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              Icon(
+                newSaved
+                    ? CupertinoIcons.bookmark_fill
+                    : CupertinoIcons.bookmark,
+                color: Colors.white,
+                size: 16,
+              ),
+              const SizedBox(width: 8),
+              Text(newSaved
+                  ? 'Publicação salva com sucesso!'
+                  : 'Removida dos salvos.'),
+            ],
+          ),
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   void _goToImage(int index) {
@@ -206,7 +252,7 @@ class _UnifiedPostCardState extends State<UnifiedPostCard>
                       : 'Salvar publicação no SocialFeed'),
                   onTap: () {
                     Navigator.pop(ctx);
-                    setState(() => _isSaved = !_isSaved);
+                    _toggleSave();
                   },
                 ),
               ],
@@ -238,12 +284,12 @@ class _UnifiedPostCardState extends State<UnifiedPostCard>
     final timeAgo = _formatTimeAgo(item.publishedAt);
 
     return Container(
-      margin: const EdgeInsets.fromLTRB(14, 4, 14, 12),
+      margin: EdgeInsets.fromLTRB(14, widget.isCompact ? 2 : 4, 14, widget.isCompact ? 8 : 12),
       decoration: BoxDecoration(
         color: isDark
             ? const Color(0xFF12151E).withValues(alpha: 0.92)
             : Colors.white.withValues(alpha: 0.95),
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(widget.isCompact ? 18 : 22),
         border: Border.all(
           color: isDark
               ? Colors.white.withValues(alpha: 0.07)
@@ -253,8 +299,8 @@ class _UnifiedPostCardState extends State<UnifiedPostCard>
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: isDark ? 0.22 : 0.03),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
+            blurRadius: widget.isCompact ? 10 : 16,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
@@ -615,10 +661,7 @@ class _UnifiedPostCardState extends State<UnifiedPostCard>
                     size: 21,
                   ),
                   visualDensity: VisualDensity.compact,
-                  onPressed: () {
-                    HapticFeedback.selectionClick();
-                    setState(() => _isSaved = !_isSaved);
-                  },
+                  onPressed: _toggleSave,
                 ),
               ],
             ),
@@ -938,21 +981,35 @@ class _UnifiedPostCardState extends State<UnifiedPostCard>
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
 
-    return GestureDetector(
-      onDoubleTap: _triggerDoubleTapLike,
-      child: AspectRatio(
-        aspectRatio: 4 / 5, // Proporção padrão do feed do Instagram
-        child: ColoredBox(
-          color: colors.surfaceContainerHighest,
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: PageView.builder(
-                  key: ObjectKey(_pages),
-                  controller: _pages,
-                  itemCount: media.length,
-                  onPageChanged: (index) => setState(() => _imageIndex = index),
-                  itemBuilder: (context, index) => Image.network(
+    final item = widget.item;
+
+    return AspectRatio(
+      aspectRatio: widget.isCompact ? 1.0 : (4 / 5),
+      child: ColoredBox(
+        color: colors.surfaceContainerHighest,
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: PageView.builder(
+                key: ObjectKey(_pages),
+                controller: _pages,
+                itemCount: media.length,
+                onPageChanged: (index) => setState(() => _imageIndex = index),
+                itemBuilder: (context, index) => GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onDoubleTap: _triggerDoubleTapLike,
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => ImageViewerScreen(
+                          imageUrls: media,
+                          initialIndex: index,
+                          item: item,
+                        ),
+                      ),
+                    );
+                  },
+                  child: Image.network(
                     media[index],
                     fit: BoxFit.cover,
                     errorBuilder: (_, __, ___) => const Center(
@@ -961,6 +1018,7 @@ class _UnifiedPostCardState extends State<UnifiedPostCard>
                   ),
                 ),
               ),
+            ),
 
               // Botões laterais de navegação no desktop/tablet
               if (media.length > 1) ...[

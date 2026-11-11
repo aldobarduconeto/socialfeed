@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 import 'liquid_glass.dart';
 
@@ -40,7 +40,7 @@ class LiquidGlassNavigationBar extends StatelessWidget {
       child: Center(
         heightFactor: 1,
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 440),
+          constraints: const BoxConstraints(maxWidth: 480),
           child: LiquidGlassContainer(
             blur: 26,
             opacity: isDark ? 0.2 : 0.34,

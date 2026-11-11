@@ -1,4 +1,4 @@
-import 'platform_type.dart';
+﻿import 'platform_type.dart';
 
 class SocialAccount {
   final String id;

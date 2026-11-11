@@ -1,4 +1,4 @@
-import 'dart:ui';
+﻿import 'dart:ui';
 import 'package:flutter/material.dart';
 
 /// Componente base de Liquid Glass (Glassmorfismo estilo SwiftUI)

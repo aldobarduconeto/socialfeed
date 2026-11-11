@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/platform_type.dart';
 import '../models/social_account.dart';
@@ -8,14 +8,17 @@ class StorageService {
   static const String _accountsKey = 'sf_saved_accounts_v2';
   static const String _cachedFeedKey = 'sf_cached_feed_v4';
   static const String _seenStoriesKey = 'sf_seen_stories_v2';
+  static const String _savedPostsKey = 'sf_saved_posts_v2';
+  static const String _compactViewKey = 'sf_compact_view_v1';
+  static const String _autoPlayKey = 'sf_autoplay_videos_v1';
   static const String _initializedKey = 'sf_accounts_initialized';
 
+  // --- ACCOUNTS ---
   static Future<List<SocialAccount>> loadAccounts() async {
     final prefs = await SharedPreferences.getInstance();
     final isInit = prefs.getBool(_initializedKey) ?? false;
 
     if (!isInit) {
-      // First run: provide curated starter accounts
       final defaultList = getStarterAccounts();
       await saveAccounts(defaultList);
       await prefs.setBool(_initializedKey, true);
@@ -37,7 +40,7 @@ class StorageService {
         }
         return SocialAccount.fromJson(data);
       }).toList();
-    } catch (e) {
+    } catch (_) {
       return [];
     }
   }
@@ -92,6 +95,7 @@ class StorageService {
     return accounts;
   }
 
+  // --- FEED CACHE ---
   static Future<List<FeedItem>> loadCachedFeed() async {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(_cachedFeedKey);
@@ -111,6 +115,67 @@ class StorageService {
     await prefs.setString(_cachedFeedKey, jsonEncode(toSave));
   }
 
+  // --- SAVED / BOOKMARKED POSTS ---
+  static Future<List<FeedItem>> loadSavedPosts() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_savedPostsKey);
+    if (raw == null || raw.isEmpty) return [];
+
+    try {
+      final List<dynamic> decoded = jsonDecode(raw);
+      return decoded.map((item) => FeedItem.fromJson(item)).toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
+  static Future<void> savePost(FeedItem item) async {
+    final posts = await loadSavedPosts();
+    final exists = posts.any(
+      (p) => p.id == item.id && p.platform == item.platform,
+    );
+    if (!exists) {
+      posts.insert(0, item);
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(
+        _savedPostsKey,
+        jsonEncode(posts.map((p) => p.toJson()).toList()),
+      );
+    }
+  }
+
+  static Future<void> removeSavedPost(String id, SocialPlatform platform) async {
+    final posts = await loadSavedPosts();
+    posts.removeWhere((p) => p.id == id && p.platform == platform);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(
+      _savedPostsKey,
+      jsonEncode(posts.map((p) => p.toJson()).toList()),
+    );
+  }
+
+  static Future<bool> isPostSaved(String id, SocialPlatform platform) async {
+    final posts = await loadSavedPosts();
+    return posts.any((p) => p.id == id && p.platform == platform);
+  }
+
+  static Future<bool> toggleSavePost(FeedItem item) async {
+    final saved = await isPostSaved(item.id, item.platform);
+    if (saved) {
+      await removeSavedPost(item.id, item.platform);
+      return false;
+    } else {
+      await savePost(item);
+      return true;
+    }
+  }
+
+  static Future<void> clearAllSavedPosts() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_savedPostsKey);
+  }
+
+  // --- SEEN STORIES ---
   static Future<Set<String>> loadSeenStories() async {
     final prefs = await SharedPreferences.getInstance();
     final list = prefs.getStringList(_seenStoriesKey) ?? [];
@@ -126,6 +191,72 @@ class StorageService {
     }
   }
 
+  // --- USER PREFERENCES ---
+  static Future<bool> loadCompactView() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_compactViewKey) ?? false;
+  }
+
+  static Future<void> saveCompactView(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_compactViewKey, enabled);
+  }
+
+  static Future<bool> loadAutoPlay() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_autoPlayKey) ?? true;
+  }
+
+  static Future<void> saveAutoPlay(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_autoPlayKey, enabled);
+  }
+
+  // --- BACKUP & RESTORE ---
+  static Future<String> exportBackupJson() async {
+    final accounts = await loadAccounts();
+    final savedPosts = await loadSavedPosts();
+    final backup = {
+      'version': '1.0',
+      'exportedAt': DateTime.now().toIso8601String(),
+      'accounts': accounts.map((a) => a.toJson()).toList(),
+      'savedPosts': savedPosts.map((p) => p.toJson()).toList(),
+    };
+    return const JsonEncoder.withIndent('  ').convert(backup);
+  }
+
+  static Future<int> importBackupJson(String rawJson) async {
+    final Map<String, dynamic> data = jsonDecode(rawJson);
+    var importedCount = 0;
+
+    if (data['accounts'] is List) {
+      final List<dynamic> accountsRaw = data['accounts'];
+      final List<SocialAccount> parsed = [];
+      for (final item in accountsRaw) {
+        try {
+          parsed.add(SocialAccount.fromJson(item as Map<String, dynamic>));
+        } catch (_) {}
+      }
+      if (parsed.isNotEmpty) {
+        await addAccounts(parsed);
+        importedCount = parsed.length;
+      }
+    }
+
+    if (data['savedPosts'] is List) {
+      final List<dynamic> postsRaw = data['savedPosts'];
+      for (final item in postsRaw) {
+        try {
+          final post = FeedItem.fromJson(item as Map<String, dynamic>);
+          await savePost(post);
+        } catch (_) {}
+      }
+    }
+
+    return importedCount;
+  }
+
+  // --- STARTER ACCOUNTS ---
   static List<SocialAccount> getStarterAccounts() {
     return [
       SocialAccount(
