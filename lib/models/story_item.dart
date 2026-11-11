@@ -1,4 +1,4 @@
-﻿import 'platform_type.dart';
+import 'platform_type.dart';
 
 class StoryItem {
   final String id;

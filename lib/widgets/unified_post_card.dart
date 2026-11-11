@@ -1,4 +1,4 @@
-﻿import 'dart:ui';
+import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -1102,8 +1102,7 @@ class _UnifiedPostCardState extends State<UnifiedPostCard>
             ],
           ),
         ),
-      ),
-    );
+      );
   }
 
   /// Placeholder de capa estilizado quando a imagem de vídeo ainda não carregou

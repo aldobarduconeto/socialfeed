@@ -1,4 +1,4 @@
-﻿import 'platform_type.dart';
+import 'platform_type.dart';
 
 enum FeedItemType {
   post,

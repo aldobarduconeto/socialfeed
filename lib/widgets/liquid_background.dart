@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
 /// Fundo atmosférico moderno e clean com gradientes suaves e isolado em RepaintBoundary
 /// para máxima fluidez de rolagem (60/120fps) sem custo de BackdropFilter em tela cheia.
