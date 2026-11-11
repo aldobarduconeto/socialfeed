@@ -43,7 +43,13 @@ jobs:
       - name: Build Android APK
         run: |
           flutter build apk --release
-          cp build/app/outputs/flutter-apk/app-release.apk socialfeed-android.apk
+          APK_FILE=$(find build/app/outputs -name "*.apk" -type f | head -n 1)
+          if [ -n "$APK_FILE" ]; then
+            cp "$APK_FILE" socialfeed-android.apk
+          else
+            cp build/app/outputs/flutter-apk/app-release.apk socialfeed-android.apk
+          fi
+          ls -la socialfeed-android.apk
 
       # Build Linux Desktop & Package .deb
       - name: Build Linux Desktop
@@ -52,13 +58,23 @@ jobs:
       - name: Package Linux .deb
         run: |
           APP_NAME="socialfeed"
-          RAW_VERSION="${GITHUB_REF_NAME#v}"
-          if [[ "$RAW_VERSION" =~ ^[0-9]+(\.[0-9]+)* ]]; then
-            VERSION="$RAW_VERSION"
+          # 1. Obtém versão válida do pubspec.yaml
+          PUBSPEC_VER=$(grep -m 1 '^version:' pubspec.yaml | sed -E 's/version:[[:space:]]*([0-9]+\.[0-9]+(\.[0-9]+)?).*/\1/' | tr -d '[:space:]')
+          [ -z "$PUBSPEC_VER" ] && PUBSPEC_VER="1.0.0"
+
+          # 2. Se a ref for uma tag que inicia com número (ex: v1.0.0 -> 1.0.0), usa a tag; se for branch (ex: main), usa do pubspec
+          TAG_CLEAN="${GITHUB_REF_NAME#v}"
+          if [[ "$TAG_CLEAN" =~ ^[0-9] ]]; then
+            VERSION=$(echo "$TAG_CLEAN" | sed -E 's/^([0-9]+\.[0-9]+(\.[0-9]+)?).*/\1/')
           else
-            VERSION=$(grep -E '^version:' pubspec.yaml | sed -E 's/version:\s*([0-9]+\.[0-9]+\.[0-9]+).*/\1/' | tr -d '[:space:]')
-            [ -z "$VERSION" ] && VERSION="1.0.0"
+            VERSION="$PUBSPEC_VER"
           fi
+
+          # Garantia estrita para formato Debian: Version DEVE começar com dígito
+          if [[ ! "$VERSION" =~ ^[0-9] ]]; then
+            VERSION="1.0.0"
+          fi
+
           ARCH="amd64"
           STAGE_DIR="deb-package/${APP_NAME}_${VERSION}_${ARCH}"
 
@@ -176,9 +192,16 @@ jobs:
 
       - name: Create DMG
         run: |
-          npm install --global create-dmg
-          create-dmg "build/macos/Build/Products/Release/socialfeed.app" . || true
-          mv *.dmg socialfeed-macos.dmg
+          APP_PATH=$(find build/macos/Build/Products/Release -name "*.app" -maxdepth 1 | head -n 1)
+          if [ -z "$APP_PATH" ]; then
+            APP_PATH="build/macos/Build/Products/Release/socialfeed.app"
+          fi
+          mkdir -p dmg_temp
+          cp -R "$APP_PATH" dmg_temp/
+          ln -s /Applications dmg_temp/Applications
+          hdiutil create -volname "SocialFeed" -srcfolder dmg_temp -ov -format UDZO socialfeed-macos.dmg
+          rm -rf dmg_temp
+          ls -lh socialfeed-macos.dmg
 
       # Build iOS IPA (unsigned payload)
       - name: Build iOS App
@@ -229,8 +252,11 @@ jobs:
       - name: Standardize Filenames
         run: |
           cd release_assets
-          [ -f "app-release.apk" ] && mv app-release.apk socialfeed-android.apk
-          [ -f "build/app/outputs/flutter-apk/app-release.apk" ] && mv build/app/outputs/flutter-apk/app-release.apk socialfeed-android.apk
+          # Procura por qualquer APK baixado e normaliza para socialfeed-android.apk
+          APK_FOUND=$(find . -name "*.apk" -type f | head -n 1)
+          if [ -n "$APK_FOUND" ] && [ "$APK_FOUND" != "./socialfeed-android.apk" ]; then
+            mv "$APK_FOUND" socialfeed-android.apk
+          fi
           ls -la
 
       - name: Create GitHub Release
